@@ -13,9 +13,7 @@ function Navigation() {
   return (
     <>
       <aside className=" flex flex-col p-4 text-gray-800 min-w-[14rem] ">
-        <Link
-          href={"/"}
-          className="flex items-center gap-2 mb-5 hover:scale-[101%] transition-transform">
+        <Link href={"/"} className="flex items-center gap-2 mb-5">
           <Image src={logo192} alt="gizmo logo" width={40} height={40} />
           <span className="text-slate-800 font-semibold">GizmoNestAdmin</span>
         </Link>
@@ -59,6 +57,26 @@ function Navigation() {
               />
             </svg>
             Products
+          </Link>
+          <Link
+            href={"/categories"}
+            className={cn(
+              pathname.includes("/categories") ? "activeLink" : "inactiveLink"
+            )}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"
+              />
+            </svg>
+            Categories
           </Link>
 
           <Link

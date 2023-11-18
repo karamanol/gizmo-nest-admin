@@ -41,18 +41,18 @@ export default function Products() {
         Add new product
       </Link>
 
-      <table className="default mt-4">
+      <table className="default mt-4 sm:max-w-5xl">
         <thead>
           <tr>
             <td>Product name</td>
-            <td></td>
+            <td className="w-52">Action</td>
           </tr>
         </thead>
         <tbody>
           {products?.map((product) => (
             <tr key={product._id}>
               <td>{product?.name}</td>
-              <td className="flex gap-1">
+              <td className="flex gap-1 justify-evenly">
                 <Link href={"/products/edit/" + product._id}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

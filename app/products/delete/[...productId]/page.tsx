@@ -1,6 +1,8 @@
 "use client";
 
 import SpinnerCircle from "@/components/SpinnerCircle";
+import supabase from "@/lib/supabase";
+import { error } from "console";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -15,8 +17,29 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
     if (!id) return;
     setIsDeleting(true);
     try {
-      const res = await fetch("/api/products?id=" + id, { method: "DELETE" });
-      if (res.ok) {
+      // Getting the product to take his image strings
+      const getResponse = await fetch("/api/products?id=" + id, {
+        method: "GET",
+      });
+      if (!getResponse.ok) throw new Error("Error getting product info");
+      const data = await getResponse.json();
+      const imgArr = data.data.images;
+      // deleting product images
+      if (!!imgArr.length) {
+        const imgNamesArray = imgArr.map((str: string) => {
+          // removing url prefix from the image name
+          return str.split("/").at(-1);
+        });
+        const { error: bucketError } = await supabase.storage
+          .from("product-images")
+          .remove(imgNamesArray);
+        if (bucketError) toast.error("Photos not found in the bucket");
+      }
+      // after deleting product images, we can delete the actual product
+      const deleteResponse = await fetch("/api/products?id=" + id, {
+        method: "DELETE",
+      });
+      if (deleteResponse.ok) {
         toast.success("Deleted successfully");
         router.push("/products");
       } else {

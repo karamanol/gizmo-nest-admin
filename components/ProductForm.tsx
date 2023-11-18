@@ -6,12 +6,15 @@ import { ChangeEvent, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import SpinnerCircle from "./SpinnerCircle";
+import supabase from "@/lib/supabase";
+import Image from "next/image";
 
 type ProductFormValues = {
   name: string;
   price: string;
   description: string;
-  images: FileList;
+  images?: string[];
+  discount: string;
 };
 
 type ProductFormProps = {
@@ -26,6 +29,7 @@ function ProductForm({
   productId,
 }: ProductFormProps) {
   const { 0: isFetching, 1: setIsFetching } = useState(false);
+  const { 0: imgNamesArray, 1: setImgNamesArray } = useState<Array<string>>([]);
 
   const {
     register,
@@ -33,6 +37,8 @@ function ProductForm({
     formState: { errors },
   } = useForm<ProductFormValues>();
   const router = useRouter();
+
+  const allProductImages = imgNamesArray.concat(defaultValuesObj?.images ?? []);
 
   // onSubmit function
   const createProduct: SubmitHandler<ProductFormValues> = async function (
@@ -45,12 +51,11 @@ function ProductForm({
         resp = await fetch("/api/products", {
           method: "POST",
           body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
         });
       } else if (action === "Update") {
         resp = await fetch("/api/products", {
           method: "PATCH",
-          body: JSON.stringify({ ...data, productId }),
+          body: JSON.stringify({ ...data, productId, allProductImages }),
           headers: { "Content-Type": "application/json" },
         });
       }
@@ -68,9 +73,25 @@ function ProductForm({
     }
   };
 
-  // function uploadImages(e: ChangeEvent<HTMLInputElement>) {
-  //   console.log(e);
-  // }
+  // Separated function for image uploading to supabase
+  async function uploadImage(e: ChangeEvent<HTMLInputElement>) {
+    const image = e.target.files?.item(0);
+    if (!image) return;
+    const imageName = `${crypto.randomUUID()}-${image.name}`.replace(/\//g, ""); //supabase will create folders if any slashes, remove slashes
+
+    const { error: supaError, data } = await supabase.storage
+      .from("product-images")
+      .upload(imageName, image);
+    if (data?.path) {
+      const imageUrl = `https://uydnhquikccddpyxmjwo.supabase.co/storage/v1/object/public/product-images/${data.path}`;
+      setImgNamesArray((arr) => [...arr, imageUrl]);
+      toast.success("Added");
+    }
+    if (supaError) {
+      toast.error(supaError.message);
+      throw new Error(supaError.message);
+    }
+  }
 
   return action === "Update" && !defaultValuesObj ? (
     <SpinnerCircle />
@@ -89,7 +110,6 @@ function ProductForm({
         type="text"
         placeholder="Product name"
       />
-
       <label htmlFor="price">Product price in USD:</label>
       {errors?.price?.message && (
         <span className="ml-4 text-red-700">{errors?.price?.message}</span>
@@ -104,23 +124,55 @@ function ProductForm({
         placeholder="Product price"
       />
 
-      <label>Images:</label>
-      <div>
-        <label className="h-24 w-24 border flex justify-center items-center text-sm gap-1 bg-gray-50 hover:bg-white rounded-lg  hover:shadow-sm transition-shadow group cursor-pointer">
-          <UploadIcon />
-          <span className="group-hover:-translate-y-[2px] transition-transform">
-            Upload
-          </span>
-          <input
-            type="file"
-            id="images"
-            {...register("images")}
-            className="hidden"
-          />
-        </label>
-        {!defaultValuesObj?.images.length ? <div>No images</div> : ""}
-      </div>
+      <label htmlFor="discount">Discount:</label>
+      {errors?.discount?.message && (
+        <span className="ml-4 text-red-700">{errors.discount.message}</span>
+      )}
+      <input
+        id="discount"
+        type="number"
+        className={cn({ "border-red-400": errors.discount })}
+        {...register("discount")}
+        placeholder="Product discount"
+        defaultValue={defaultValuesObj?.discount || "0"}
+        disabled={isFetching}
+      />
 
+      {action === "Update" && (
+        <>
+          <label>Images:</label>
+          <div className="flex gap-3">
+            <label className="h-24 min-w-[6rem] border flex justify-center items-center text-sm gap-1 bg-gray-50 hover:bg-white rounded-lg  hover:shadow-sm transition-shadow group cursor-pointer mb-3 mr-5">
+              <UploadIcon />
+              <span className="group-hover:-translate-y-[2px] transition-transform">
+                Upload
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                id="images"
+                // {...register("images")}
+                onChange={uploadImage}
+                className="hidden"
+              />
+            </label>
+            <div className="flex w-full overflow-x-auto gap-2">
+              {allProductImages?.map((el, i) => (
+                <div
+                  key={el}
+                  className="h-24 min-w-[6rem] relative  rounded-lg">
+                  <Image
+                    fill
+                    src={el}
+                    alt={`uploaded image ${i}`}
+                    className="object-cover rounded-lg border border-gray-20 "
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
       <label htmlFor="description">Product description:</label>
       <textarea
         defaultValue={defaultValuesObj?.description}
@@ -129,7 +181,6 @@ function ProductForm({
         {...register("description")}
         placeholder="Description"
       />
-
       <button
         type="submit"
         className="btn-primary flex gap-1"

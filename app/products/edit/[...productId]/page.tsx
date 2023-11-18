@@ -15,7 +15,7 @@ function EditProductPage({ params }: { params: { productId: string } }) {
         setProductValues(data.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.message);
       });
   }, [id, setProductValues]);
 

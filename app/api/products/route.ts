@@ -9,11 +9,12 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   await mongooseConnect();
   try {
-    const { name, price, description } = await request.json();
+    const { name, price, description, discount } = await request.json();
     const newProduct = await Product.create({
       name,
       description,
       price,
+      discount,
     });
     return Response.json({ status: 200, data: newProduct });
   } catch (err) {
@@ -47,13 +48,17 @@ export async function GET(request: Request) {
 export async function PATCH(request: NextRequest) {
   await mongooseConnect();
   try {
-    const { name, price, description, productId } = await request.json();
+    const { name, price, description, productId, allProductImages, discount } =
+      await request.json();
+
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       {
         name,
         description,
         price,
+        images: allProductImages,
+        discount,
       },
       { new: true, runValidators: true }
     );
