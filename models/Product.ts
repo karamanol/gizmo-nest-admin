@@ -5,7 +5,8 @@ const productSchema = new mongoose.Schema({
   description: String,
   price: { type: Number, required: [true, "Product must have a price"] },
   images: [String],
-  discount: String,
+  discount: { type: Number },
+  category: { type: mongoose.Types.ObjectId, ref: "Category" },
 });
 export const Product =
   // @ts-ignore

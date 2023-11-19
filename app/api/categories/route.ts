@@ -10,8 +10,10 @@ export async function POST(request: NextRequest) {
   try {
     await mongooseConnect();
     const { category, parentCat } = await request.json();
-    console.log("parent category", parentCat);
-    const categoryDoc = await Category.create({ name: category, parentCat });
+    const categoryDoc = await Category.create({
+      name: category,
+      ...(parentCat ? { parentCat } : { $unset: { parentCat: "" } }), // omit if no parent category
+    });
     return Response.json({ status: 200, data: categoryDoc });
   } catch (err) {
     if (err instanceof Error || err instanceof MongooseError) {

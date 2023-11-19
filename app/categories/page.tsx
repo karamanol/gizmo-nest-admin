@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 type CategoryFormValues = { category: string; parentCat: string };
-type CategoryFromDB = {
+export type CategoryFromDB = {
   _id: string;
   name: string;
   parentCat?: { _id: string; name: string };
@@ -83,6 +83,7 @@ function CategoriesPage() {
           body: JSON.stringify(data),
         });
         if (resp.ok) {
+          setParentOption("");
           reset();
           toast.success("Created successfully");
           getCategories();
@@ -149,6 +150,22 @@ function CategoriesPage() {
                   </option>
                 ))}
           </select>
+        </div>
+        {errors.category && (
+          <span className="ml-1 text-red-600">{errors.category.message}</span>
+        )}
+        <div>
+          <label>Properties:</label>
+          <button
+            type="button"
+            className="btn-default !bg-teal-700/70 !px-2 text-sm !py-1 mx-4 my-2 ">
+            Add property
+          </button>
+        </div>
+        <div
+          className={cn("flex gap-2 mt-3 ", {
+            "justify-around": editingCategory,
+          })}>
           <button
             type="submit"
             className="btn-primary"
@@ -167,71 +184,74 @@ function CategoriesPage() {
             </button>
           )}
         </div>
-        {errors.category && (
-          <span className="ml-1 text-red-600">{errors.category.message}</span>
-        )}
       </form>
       {isFetchingAllCategories ? (
         <SpinnerCircle />
+      ) : !editingCategory ? (
+        <>
+          <table className="default sm:max-w-5xl">
+            <thead>
+              <tr className="text-center">
+                <td>Category name</td>
+                <td>Parent category</td>
+                <td className="w-40">Action</td>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.length > 0 &&
+                categories?.map((category) => (
+                  <tr key={category._id}>
+                    <td>{category.name}</td>
+                    <td>{category.parentCat?.name}</td>
+                    <td className="flex gap-1 justify-evenly">
+                      <button
+                        disabled={isCreatingOrUpdating}
+                        onClick={() => {
+                          setEditingCategory((prev) => {
+                            setParentOption(category.parentCat?._id || "");
+                            return category;
+                          });
+                        }}
+                        className="btn-primary">
+                        Edit
+                      </button>
+                      <button
+                        disabled={isCreatingOrUpdating}
+                        className="btn-primary"
+                        onClick={() =>
+                          Swal.fire({
+                            title: `Deleting "${category.name}". Are you sure?`,
+                            showCancelButton: true,
+                            showConfirmButton: true,
+                            confirmButtonText: "Yes!",
+                            confirmButtonColor: "#e11d48",
+                            animation: false,
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              (async () => {
+                                const successfully = await deleteSomeCategory(
+                                  category._id
+                                );
+                                if (successfully) {
+                                  toast.success(
+                                    "Category deleted successfully"
+                                  );
+                                  getCategories();
+                                }
+                              })();
+                            }
+                          })
+                        }>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </>
       ) : (
-        <table className="default sm:max-w-5xl">
-          <thead>
-            <tr className="text-center">
-              <td>Category name</td>
-              <td>Parent category</td>
-              <td className="w-40">Action</td>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.length > 0 &&
-              categories?.map((category) => (
-                <tr key={category._id}>
-                  <td>{category.name}</td>
-                  <td>{category.parentCat?.name}</td>
-                  <td className="flex gap-1 justify-evenly">
-                    <button
-                      disabled={isCreatingOrUpdating}
-                      onClick={() => {
-                        setEditingCategory((prev) => {
-                          setParentOption(category.parentCat?._id || "");
-                          return category;
-                        });
-                      }}
-                      className="btn-primary">
-                      Edit
-                    </button>
-                    <button
-                      disabled={isCreatingOrUpdating}
-                      className="btn-primary"
-                      onClick={() =>
-                        Swal.fire({
-                          title: `Deleting "${category.name}". Are you sure?`,
-                          showCancelButton: true,
-                          showConfirmButton: true,
-                          confirmButtonText: "Yes!",
-                          confirmButtonColor: "#e11d48",
-                          animation: false,
-                        }).then((result) => {
-                          if (result.isConfirmed) {
-                            (async () => {
-                              const successfully = await deleteSomeCategory(
-                                category._id
-                              );
-                              if (successfully) {
-                                toast.success("Category deleted successfully");
-                                getCategories();
-                              }
-                            })();
-                          }
-                        })
-                      }>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        ""
       )}
     </div>
   );

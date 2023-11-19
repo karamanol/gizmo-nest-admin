@@ -2,12 +2,14 @@
 
 import { cn } from "@/lib/cn";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import SpinnerCircle from "./SpinnerCircle";
 import supabase from "@/lib/supabase";
 import Image from "next/image";
+import { CategoryFromDB } from "@/app/categories/page";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 type ProductFormValues = {
   name: string;
@@ -15,6 +17,7 @@ type ProductFormValues = {
   description: string;
   images?: string[];
   discount: string;
+  category: string;
 };
 
 type ProductFormProps = {
@@ -30,14 +33,43 @@ function ProductForm({
 }: ProductFormProps) {
   const { 0: isFetching, 1: setIsFetching } = useState(false);
   const { 0: imgNamesArray, 1: setImgNamesArray } = useState<Array<string>>([]);
+  const { 0: categories, 1: setCategories } = useState<Array<CategoryFromDB>>(
+    []
+  );
+  const { 0: isFetchingCategories, 1: setIsFetchingCategories } =
+    useState(false);
+
+  // getting all categories to fill options section
+  useEffect(() => {
+    (async () => {
+      setIsFetchingCategories(true);
+      try {
+        const categoriesData = await fetch("/api/categories", {
+          method: "GET",
+        });
+        if (!categoriesData.ok)
+          throw new Error("Cannot get categories from API");
+        const categories = await categoriesData.json();
+        setCategories(categories.data);
+      } catch (err) {
+        toast.error(getErrorMessage(err));
+      } finally {
+        setIsFetchingCategories(false);
+      }
+    })();
+  }, [setCategories, setIsFetchingCategories]);
+  // console.log("categs", categories);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    control,
   } = useForm<ProductFormValues>();
   const router = useRouter();
 
+  // put together old images and the new ones
   const allProductImages = imgNamesArray.concat(defaultValuesObj?.images ?? []);
 
   // onSubmit function
@@ -51,11 +83,16 @@ function ProductForm({
         resp = await fetch("/api/products", {
           method: "POST",
           body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
         });
       } else if (action === "Update") {
         resp = await fetch("/api/products", {
           method: "PATCH",
-          body: JSON.stringify({ ...data, productId, allProductImages }),
+          body: JSON.stringify({
+            ...data,
+            productId,
+            allProductImages,
+          }),
           headers: { "Content-Type": "application/json" },
         });
       }
@@ -93,6 +130,13 @@ function ProductForm({
     }
   }
 
+  // prefill selected category
+  useEffect(() => {
+    if (defaultValuesObj instanceof Object && "category" in defaultValuesObj) {
+      setValue("category", defaultValuesObj.category);
+    }
+  }, [defaultValuesObj, setValue]);
+
   return action === "Update" && !defaultValuesObj ? (
     <SpinnerCircle />
   ) : (
@@ -110,6 +154,22 @@ function ProductForm({
         type="text"
         placeholder="Product name"
       />
+
+      <label htmlFor="category">Category</label>
+      <select
+        id="category"
+        className="h-9"
+        disabled={isFetchingCategories}
+        {...register("category")}>
+        <option value="">Without category</option>
+        {categories.length > 0 &&
+          categories.map((c) => (
+            <option value={c._id} key={c._id}>
+              {c.name}
+            </option>
+          ))}
+      </select>
+
       <label htmlFor="price">Product price in USD:</label>
       {errors?.price?.message && (
         <span className="ml-4 text-red-700">{errors?.price?.message}</span>
@@ -151,7 +211,6 @@ function ProductForm({
                 type="file"
                 accept="image/*"
                 id="images"
-                // {...register("images")}
                 onChange={uploadImage}
                 className="hidden"
               />
