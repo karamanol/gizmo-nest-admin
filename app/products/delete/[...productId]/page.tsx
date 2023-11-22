@@ -2,7 +2,6 @@
 
 import SpinnerCircle from "@/components/SpinnerCircle";
 import supabase from "@/lib/supabase";
-import { error } from "console";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";

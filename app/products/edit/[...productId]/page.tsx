@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 function EditProductPage({ params }: { params: { productId: string } }) {
   const id = params.productId;
-  const { 0: productValues, 1: setProductValues } = useState(null);
+  const { 0: productValues, 1: setProductValues } = useState();
   useEffect(() => {
     if (id === undefined || id.length === 0) return;
 

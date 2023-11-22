@@ -32,14 +32,41 @@ function ProductForm({
   productId,
 }: ProductFormProps) {
   const { 0: isFetching, 1: setIsFetching } = useState(false);
-  const { 0: imgNamesArray, 1: setImgNamesArray } = useState<Array<string>>([]);
+  const { 0: newImgNamesArray, 1: setImgNamesArray } = useState<Array<string>>(
+    []
+  );
+  const { 0: oldImgNamesArray, 1: setOldImgNamesArray } = useState<
+    Array<string>
+  >([]);
+  const { 0: newAndOldImgArray, 1: setNewAndOldImgArray } = useState<
+    Array<string>
+  >([]);
+
   const { 0: categories, 1: setCategories } = useState<Array<CategoryFromDB>>(
     []
   );
   const { 0: isFetchingCategories, 1: setIsFetchingCategories } =
     useState(false);
+  const { 0: isDeletingImage, 1: setIsDeletingImage } = useState("");
 
-  // getting all categories to fill options section
+  // set old images from db if they are
+  useEffect(() => {
+    if (
+      defaultValuesObj &&
+      defaultValuesObj.images &&
+      defaultValuesObj.images.length > 0
+    ) {
+      defaultValuesObj.images;
+      setOldImgNamesArray([...defaultValuesObj.images]);
+    }
+  }, [defaultValuesObj, setOldImgNamesArray]);
+
+  // keep fresh data about new and old images
+  useEffect(() => {
+    setNewAndOldImgArray([...oldImgNamesArray, ...newImgNamesArray]);
+  }, [newImgNamesArray, oldImgNamesArray, setNewAndOldImgArray]);
+
+  // getting all categories to fill options section "Category"
   useEffect(() => {
     (async () => {
       setIsFetchingCategories(true);
@@ -58,19 +85,16 @@ function ProductForm({
       }
     })();
   }, [setCategories, setIsFetchingCategories]);
-  // console.log("categs", categories);
 
+  // React-hook-form stuff
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    control,
   } = useForm<ProductFormValues>();
-  const router = useRouter();
 
-  // put together old images and the new ones
-  const allProductImages = imgNamesArray.concat(defaultValuesObj?.images ?? []);
+  const router = useRouter();
 
   // onSubmit function
   const createProduct: SubmitHandler<ProductFormValues> = async function (
@@ -91,7 +115,7 @@ function ProductForm({
           body: JSON.stringify({
             ...data,
             productId,
-            allProductImages,
+            allProductImages: newAndOldImgArray,
           }),
           headers: { "Content-Type": "application/json" },
         });
@@ -129,6 +153,27 @@ function ProductForm({
       throw new Error(supaError.message);
     }
   }
+
+  //function to delete image from supabase
+  const deleteImageFromSupa = async (imgToDelete: string, prodId: string) => {
+    const preparedString = imgToDelete.split("/").at(-1); // drop all except image name
+    if (preparedString) {
+      setIsDeletingImage(imgToDelete);
+      const resp = await fetch(
+        `/api/products/delete-image?img=${preparedString}&prodId=${prodId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const data = await resp.json();
+      setIsDeletingImage("");
+      if ("message" in data) {
+        return data.message;
+      } else if ("error" in data) {
+        return data.error;
+      }
+    }
+  };
 
   // prefill selected category
   useEffect(() => {
@@ -204,7 +249,7 @@ function ProductForm({
           <div className="flex gap-3">
             <label className="h-24 min-w-[6rem] border flex justify-center items-center text-sm gap-1 bg-gray-50 hover:bg-white rounded-lg  hover:shadow-sm transition-shadow group cursor-pointer mb-3 mr-5">
               <UploadIcon />
-              <span className="group-hover:-translate-y-[2px] transition-transform">
+              <span className="group-hover:-translate-y-[2px] transition-all">
                 Upload
               </span>
               <input
@@ -216,15 +261,35 @@ function ProductForm({
               />
             </label>
             <div className="flex w-full overflow-x-auto gap-2">
-              {allProductImages?.map((el, i) => (
-                <div
-                  key={el}
-                  className="h-24 min-w-[6rem] relative  rounded-lg">
+              {newAndOldImgArray?.map((el, i) => (
+                <div key={el} className="h-24 min-w-[6rem] relative rounded-lg">
+                  <button
+                    className={cn(
+                      "rounded-lg absolute z-50 opacity-0 hover:opacity-40 hover:bg-slate-400 transition-all cursor-pointer",
+                      { "opacity-40": isDeletingImage === el }
+                    )}
+                    type="button"
+                    onClick={async () => {
+                      const result = await deleteImageFromSupa(
+                        el,
+                        productId || ""
+                      );
+                      if (result === "success") {
+                        setNewAndOldImgArray((prev) =>
+                          [...prev].filter((img) => img !== el)
+                        );
+                      } else {
+                        toast.error(result);
+                      }
+                    }}>
+                    <DeleteImageIcon processing={isDeletingImage === el} />
+                  </button>
                   <Image
                     fill
                     src={el}
                     alt={`uploaded image ${i}`}
                     className="object-cover rounded-lg border border-gray-20 "
+                    quality={50}
                   />
                 </div>
               ))}
@@ -259,6 +324,7 @@ function ProductForm({
 
 export default ProductForm;
 
+//-------------------------------ICONS -------------------------------
 function UploadIcon() {
   return (
     <svg
@@ -267,7 +333,9 @@ function UploadIcon() {
       viewBox="0 0 24 24"
       strokeWidth={1}
       stroke="currentColor"
-      className="w-6 h-6  group-hover:-translate-y-[2px] transition-transform">
+      className={cn(
+        "w-6 h-6 group-hover:-translate-y-[2px] transition-transform"
+      )}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -276,3 +344,21 @@ function UploadIcon() {
     </svg>
   );
 }
+
+const DeleteImageIcon = ({ processing }: { processing: boolean }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="red"
+      className={cn("w-full h-full", { "animate-spin": processing })}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+};

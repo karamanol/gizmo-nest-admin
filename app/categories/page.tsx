@@ -13,6 +13,7 @@ export type CategoryFromDB = {
   _id: string;
   name: string;
   parentCat?: { _id: string; name: string };
+  properties?: { propertyName: string; propertyValuesArr: string[] }[];
 };
 
 function CategoriesPage() {
@@ -23,14 +24,17 @@ function CategoriesPage() {
   );
   const { 0: editingCategory, 1: setEditingCategory } =
     useState<CategoryFromDB | null>(null);
-  const { 0: parentOption, 1: setParentOption } = useState<string>();
   const { 0: isFetchingAllCategories, 1: setIsFetchingAllCategories } =
     useState(false);
+  const { 0: propertiesArray, 1: setPropertiesArray } = useState<
+    Array<{ propertyName: string; propertyValuesAsOneString: string }>
+  >([]);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CategoryFormValues>();
 
@@ -38,11 +42,11 @@ function CategoriesPage() {
     setIsFetchingAllCategories(true);
     try {
       const res = await fetch("/api/categories", { method: "GET" });
-      if (res.ok) {
+      if (res.ok && res.status === 200) {
         const data: { data: Array<CategoryFromDB> } = await res.json();
         setCategories(data.data);
       } else {
-        toast.error("Cannot get categories at the moment");
+        toast.error(`Cannot get categories at the moment: ${res.statusText}`);
       }
     } catch (err) {
       toast.error(
@@ -64,30 +68,69 @@ function CategoriesPage() {
     try {
       // When updating category:
       if (editingCategory !== null) {
+        if (
+          propertiesArray.some(
+            (property) =>
+              property.propertyName.trim() === "" ||
+              property.propertyValuesAsOneString.trim() === ""
+          )
+        ) {
+          toast.error("Poperty name or value cannot be empty");
+          return;
+        }
+
         console.log("editing category starts here");
         const resp = await fetch("/api/categories", {
           method: "PATCH",
-          body: JSON.stringify({ ...data, _id: editingCategory._id }),
+          body: JSON.stringify({
+            ...data,
+            _id: editingCategory._id,
+            propertiesArray,
+          }),
         });
-        console.log("response from server", resp);
-        if (resp.ok) {
-          reset();
-          toast.success(`"${editingCategory.name}" Updated successfully`);
-          getCategories();
+        // console.log("response from server", resp);
+        const respBody = await resp.json();
+        if (respBody.error || !resp.ok) {
+          toast.error(respBody.error || "Error updating category");
+          return;
         }
+
+        reset();
+        setEditingCategory(null);
+        setPropertiesArray([]);
+        toast.success(`"${editingCategory.name}" Updated successfully`);
+        getCategories();
       }
+
       // When adding new category
       else {
+        if (
+          propertiesArray.some(
+            (property) =>
+              property.propertyName.trim() === "" ||
+              property.propertyValuesAsOneString.trim() === ""
+          )
+        ) {
+          toast.error("Poperty name or value cannot be empty");
+          return;
+        }
+
         const resp = await fetch("/api/categories", {
           method: "POST",
-          body: JSON.stringify(data),
+          body: JSON.stringify({ data, propertiesArray }),
         });
-        if (resp.ok) {
-          setParentOption("");
-          reset();
-          toast.success("Created successfully");
-          getCategories();
+
+        const respBody = await resp.json();
+        // console.log("response from server", respBody);
+        if (respBody.error || !resp.ok) {
+          toast.error(respBody.error || "Error creating category");
+          return;
         }
+
+        setPropertiesArray([]);
+        reset();
+        toast.success("Created successfully");
+        getCategories();
       }
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -112,6 +155,9 @@ function CategoriesPage() {
     }
   };
 
+  // console.log(propertiesArray);
+  console.log("categories", categories);
+
   return (
     <div>
       <h1 className="text-teal-700 font-semibold mb-2 text-xl">Categories</h1>
@@ -130,15 +176,15 @@ function CategoriesPage() {
             {...register("category", { required: "Name the category" })}
             className={cn({ "border-red-400": errors.category }, "mb-0")}
             type="text"
-            defaultValue={editingCategory?.name}
             placeholder="Category name"
             disabled={isCreatingOrUpdating}
           />
           <select
             {...register("parentCat")}
             className="mb-0"
-            value={parentOption}
-            onChange={(e) => setParentOption(e.target.value)}>
+            // value={parentOption}
+            // onChange={(e) => setParentOption(e.target.value)}
+          >
             <option value={""}>Without parent</option>
             {categories.length > 0 &&
               // filter stands for excluding recursive relation when category has as parent itself
@@ -154,14 +200,68 @@ function CategoriesPage() {
         {errors.category && (
           <span className="ml-1 text-red-600">{errors.category.message}</span>
         )}
+
         <div>
           <label>Properties:</label>
           <button
             type="button"
-            className="btn-default !bg-teal-700/70 !px-2 text-sm !py-1 mx-4 my-2 ">
+            onClick={() =>
+              setPropertiesArray((prev) => [
+                ...prev,
+                { propertyName: "", propertyValuesAsOneString: "" },
+              ])
+            }
+            className="btn-default !bg-teal-700/70 !px-2 text-sm !py-1 mx-4 mt-4 mb-2 ">
             Add property
           </button>
+          {propertiesArray.length > 0 && (
+            <button
+              type="button"
+              className="btn-default !bg-red-800/60 !px-2 text-sm !py-1 mx-4 mt-4 mb-2"
+              onClick={() =>
+                setPropertiesArray((prev) => prev.slice(0, prev.length - 1))
+              }>
+              Remove
+            </button>
+          )}
+          {propertiesArray.map((_property, i) => (
+            <div key={i} className="flex gap-2">
+              <input
+                placeholder="Property name"
+                value={propertiesArray[i].propertyName}
+                onChange={(e) => {
+                  setPropertiesArray((prev) => {
+                    const copyArr = [...prev];
+                    const currentObject = copyArr[i];
+                    const updatedObject = {
+                      ...currentObject,
+                      propertyName: e.target.value,
+                    };
+                    copyArr[i] = updatedObject;
+                    return [...copyArr];
+                  });
+                }}
+              />
+              <input
+                placeholder="Values (Comma separated!)"
+                value={propertiesArray[i].propertyValuesAsOneString}
+                onChange={(e) => {
+                  setPropertiesArray((prev) => {
+                    const copyArr = [...prev];
+                    const currentObject = copyArr[i];
+                    const updatedObject = {
+                      ...currentObject,
+                      propertyValuesAsOneString: e.target.value,
+                    };
+                    copyArr[i] = updatedObject;
+                    return [...copyArr];
+                  });
+                }}
+              />
+            </div>
+          ))}
         </div>
+
         <div
           className={cn("flex gap-2 mt-3 ", {
             "justify-around": editingCategory,
@@ -177,14 +277,17 @@ function CategoriesPage() {
               className="btn-primary !bg-teal-700/70 !px-2"
               onClick={(e) => {
                 e.preventDefault();
+                setValue("category", "");
+                setValue("parentCat", "");
                 setEditingCategory(null);
-                setParentOption("");
+                setPropertiesArray([]);
               }}>
               Cancel
             </button>
           )}
         </div>
       </form>
+
       {isFetchingAllCategories ? (
         <SpinnerCircle />
       ) : !editingCategory ? (
@@ -207,8 +310,20 @@ function CategoriesPage() {
                       <button
                         disabled={isCreatingOrUpdating}
                         onClick={() => {
-                          setEditingCategory((prev) => {
-                            setParentOption(category.parentCat?._id || "");
+                          setEditingCategory(() => {
+                            setValue("category", category.name);
+                            setValue(
+                              "parentCat",
+                              category.parentCat?._id || ""
+                            );
+                            setPropertiesArray(
+                              category.properties?.map((property) => ({
+                                propertyName: property.propertyName,
+                                propertyValuesAsOneString:
+                                  property.propertyValuesArr.join(", "),
+                              })) || []
+                            );
+
                             return category;
                           });
                         }}
