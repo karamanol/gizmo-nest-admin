@@ -46,7 +46,7 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
       }
     } catch (err) {
       if (err instanceof Error) {
-        console.log(err.message);
+        console.error(err.message);
         toast(err.message);
       }
     } finally {
@@ -66,7 +66,7 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
       } catch (err) {
         if (err instanceof Error) {
           toast(err.message);
-          console.log(err.message);
+          console.error(err.message);
         }
       }
     }

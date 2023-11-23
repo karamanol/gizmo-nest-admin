@@ -79,7 +79,6 @@ function CategoriesPage() {
           return;
         }
 
-        console.log("editing category starts here");
         const resp = await fetch("/api/categories", {
           method: "PATCH",
           body: JSON.stringify({
@@ -88,7 +87,6 @@ function CategoriesPage() {
             propertiesArray,
           }),
         });
-        // console.log("response from server", resp);
         const respBody = await resp.json();
         if (respBody.error || !resp.ok) {
           toast.error(respBody.error || "Error updating category");
@@ -121,7 +119,6 @@ function CategoriesPage() {
         });
 
         const respBody = await resp.json();
-        // console.log("response from server", respBody);
         if (respBody.error || !resp.ok) {
           toast.error(respBody.error || "Error creating category");
           return;
@@ -154,9 +151,6 @@ function CategoriesPage() {
       console.error(getErrorMessage(err));
     }
   };
-
-  // console.log(propertiesArray);
-  console.log("categories", categories);
 
   return (
     <div>

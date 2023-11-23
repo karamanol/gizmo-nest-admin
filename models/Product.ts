@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema({
   images: [String],
   discount: { type: Number },
   category: { type: mongoose.Types.ObjectId, ref: "Category" },
+  productProperties: { type: Object, default: {} },
 });
 export const Product =
   // @ts-ignore

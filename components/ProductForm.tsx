@@ -19,9 +19,30 @@ type ProductFormValues = {
   discount: string;
   category: string;
 };
+type CategoryType = {
+  _id: string;
+  name: string;
+  properties?: CategoryPropertiesType;
+  parentCat?: Omit<CategoryType, "parentCat">;
+};
 
+type DefaultValuesObjType = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  discount: number;
+  category: CategoryType;
+  productProperties: { [key: string]: string };
+};
+type CategoryPropertiesType = {
+  _id: string;
+  propertyName: string;
+  propertyValuesArr: string[];
+}[];
 type ProductFormProps = {
-  defaultValuesObj?: ProductFormValues | null;
+  defaultValuesObj?: DefaultValuesObjType | null;
   action: "Create" | "Update";
   productId?: string;
 };
@@ -48,6 +69,14 @@ function ProductForm({
   const { 0: isFetchingCategories, 1: setIsFetchingCategories } =
     useState(false);
   const { 0: isDeletingImage, 1: setIsDeletingImage } = useState("");
+  const {
+    0: editingProductPropertiesToFill,
+    1: setEditingProductPropertiesToFill,
+  } = useState<CategoryPropertiesType>([]);
+  const {
+    0: editingProductPropertiesToSave,
+    1: setEditingProductPropertiesToSave,
+  } = useState<{ [key: string]: string }>({});
 
   // set old images from db if they are
   useEffect(() => {
@@ -56,7 +85,6 @@ function ProductForm({
       defaultValuesObj.images &&
       defaultValuesObj.images.length > 0
     ) {
-      defaultValuesObj.images;
       setOldImgNamesArray([...defaultValuesObj.images]);
     }
   }, [defaultValuesObj, setOldImgNamesArray]);
@@ -96,43 +124,44 @@ function ProductForm({
 
   const router = useRouter();
 
-  // onSubmit function
-  const createProduct: SubmitHandler<ProductFormValues> = async function (
-    data
-  ) {
-    setIsFetching(true);
-    let resp;
-    try {
-      if (action === "Create") {
-        resp = await fetch("/api/products", {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        });
-      } else if (action === "Update") {
-        resp = await fetch("/api/products", {
-          method: "PATCH",
-          body: JSON.stringify({
-            ...data,
-            productId,
-            allProductImages: newAndOldImgArray,
-          }),
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+  // onSubmit form function
+  const createOrUpdateProduct: SubmitHandler<ProductFormValues> =
+    async function (data) {
+      setIsFetching(true);
+      let resp;
+      try {
+        if (action === "Create") {
+          resp = await fetch("/api/products", {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: { "Content-Type": "application/json" },
+          });
+        } else if (action === "Update") {
+          resp = await fetch("/api/products", {
+            method: "PATCH",
+            body: JSON.stringify({
+              ...data,
+              productId,
+              allProductImages: newAndOldImgArray,
+              productProperties: editingProductPropertiesToSave,
+            }),
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        const respData = await resp?.json();
 
-      if (resp?.ok) {
-        toast.success(`Product ${action}d successfully`);
-        router.push("/products");
-      } else if (resp?.statusText) {
-        toast.error(resp.statusText);
+        if (resp?.ok && !("error" in respData)) {
+          toast.success(`Product ${action}d successfully`);
+          router.push("/products");
+        } else if (respData.error) {
+          toast.error(respData.error);
+        }
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
+      } finally {
+        setIsFetching(false);
       }
-    } catch (err) {
-      if (err instanceof Error) toast.error(err.message);
-    } finally {
-      setIsFetching(false);
-    }
-  };
+    };
 
   // Separated function for image uploading to supabase
   async function uploadImage(e: ChangeEvent<HTMLInputElement>) {
@@ -175,18 +204,54 @@ function ProductForm({
     }
   };
 
+  // onChange handler for product properties
+  function handlePropertyChange(
+    e: ChangeEvent<HTMLSelectElement>,
+    propertyName: string
+  ) {
+    const value = e.target.value;
+    setEditingProductPropertiesToSave((prev) => {
+      return { ...prev, [propertyName]: value };
+    });
+  }
+
   // prefill selected category
   useEffect(() => {
     if (defaultValuesObj instanceof Object && "category" in defaultValuesObj) {
-      setValue("category", defaultValuesObj.category);
+      setValue("category", defaultValuesObj.category._id);
     }
   }, [defaultValuesObj, setValue]);
+
+  // setting all properties that may be filled for this type of product based on category
+  useEffect(() => {
+    const categoryPropeties = defaultValuesObj?.category?.properties;
+    const parentCatPropeties =
+      defaultValuesObj?.category?.parentCat?.properties;
+    const allProperties = [
+      ...(categoryPropeties || []),
+      ...(parentCatPropeties || []),
+    ]; // properties from product category + properties of PARENT category of category
+
+    // adding old properties of product to show on page as already selected
+    const oldProductProperties = defaultValuesObj?.productProperties;
+    if (oldProductProperties !== undefined) {
+      setEditingProductPropertiesToSave(oldProductProperties);
+    }
+
+    setEditingProductPropertiesToFill([...allProperties]);
+  }, [
+    defaultValuesObj,
+    setEditingProductPropertiesToFill,
+    setEditingProductPropertiesToSave,
+  ]);
 
   return action === "Update" && !defaultValuesObj ? (
     <SpinnerCircle />
   ) : (
-    <form onSubmit={handleSubmit(createProduct)}>
-      <label htmlFor="name">Product name:</label>
+    <form onSubmit={handleSubmit(createOrUpdateProduct)}>
+      <label htmlFor="name" className="text-lg">
+        Product name:
+      </label>
       {errors?.name?.message && (
         <span className="ml-4 text-red-700">{errors?.name?.message}</span>
       )}
@@ -200,7 +265,9 @@ function ProductForm({
         placeholder="Product name"
       />
 
-      <label htmlFor="category">Category</label>
+      <label htmlFor="category" className="text-lg">
+        Category:
+      </label>
       <select
         id="category"
         className="h-9"
@@ -215,7 +282,41 @@ function ProductForm({
           ))}
       </select>
 
-      <label htmlFor="price">Product price in USD:</label>
+      {action === "Update" && editingProductPropertiesToFill.length > 0 && (
+        <div className="flex flex-wrap gap-6 items-center mb-3">
+          <label className="text-lg">Properties:</label>
+          {editingProductPropertiesToFill.map((propObj) => {
+            return (
+              <div key={propObj._id} className="flex gap-2 items-center">
+                <label className="font-semibold text-gray-800">{`${propObj.propertyName}:`}</label>
+                <select
+                  defaultValue={
+                    defaultValuesObj?.productProperties?.[
+                      propObj?.["propertyName"]
+                    ] || ""
+                  }
+                  className="!m-0"
+                  onChange={(e) =>
+                    handlePropertyChange(e, propObj.propertyName)
+                  }>
+                  <option value={""}>Not set</option>
+                  {propObj.propertyValuesArr.map((val) => {
+                    return (
+                      <option key={val} value={val}>
+                        {val}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <label htmlFor="price" className="text-lg">
+        Product price in USD:
+      </label>
       {errors?.price?.message && (
         <span className="ml-4 text-red-700">{errors?.price?.message}</span>
       )}
@@ -229,7 +330,9 @@ function ProductForm({
         placeholder="Product price"
       />
 
-      <label htmlFor="discount">Discount:</label>
+      <label htmlFor="discount" className="text-lg">
+        Discount:
+      </label>
       {errors?.discount?.message && (
         <span className="ml-4 text-red-700">{errors.discount.message}</span>
       )}
@@ -245,7 +348,7 @@ function ProductForm({
 
       {action === "Update" && (
         <>
-          <label>Images:</label>
+          <label className="text-lg">Images:</label>
           <div className="flex gap-3">
             <label className="h-24 min-w-[6rem] border flex justify-center items-center text-sm gap-1 bg-gray-50 hover:bg-white rounded-lg  hover:shadow-sm transition-shadow group cursor-pointer mb-3 mr-5">
               <UploadIcon />
@@ -297,7 +400,10 @@ function ProductForm({
           </div>
         </>
       )}
-      <label htmlFor="description">Product description:</label>
+
+      <label htmlFor="description" className="text-lg">
+        Product description:
+      </label>
       <textarea
         defaultValue={defaultValuesObj?.description}
         disabled={isFetching}

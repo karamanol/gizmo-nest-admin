@@ -21,7 +21,6 @@ export async function DELETE(request: NextRequest) {
         error: "Image or product not found",
         status: 404,
       });
-    console.log(img);
 
     //delete image from supabase
     const { error: bucketError } = await supabase.storage

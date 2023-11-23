@@ -33,7 +33,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (id) {
-      const product = await Product.findById(id);
+      const product = await Product.findById(id).populate({
+        path: "category",
+        populate: { path: "parentCat" },
+      });
       return Response.json({ status: 200, data: product });
     }
 
@@ -58,6 +61,7 @@ export async function PATCH(request: NextRequest) {
       allProductImages,
       discount,
       category,
+      productProperties,
     } = await request.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -68,6 +72,7 @@ export async function PATCH(request: NextRequest) {
         price,
         images: allProductImages,
         discount,
+        productProperties,
         ...(category ? { category } : { $unset: { category: "" } }), // when no category is specified - no category to be set on product
       },
       { new: true, runValidators: true }
