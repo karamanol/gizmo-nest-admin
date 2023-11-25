@@ -16,16 +16,21 @@ function UserAvatar({ className }: UserAvatarProps) {
   if (!session) return null;
 
   return (
-    <div className={cn("flex gap-2 items-center mt-auto", className)}>
+    <div
+      className={cn(
+        "flex gap-2 items-center mt-auto flex-col sm:flex-row",
+        className
+      )}>
       <Image
         src={session?.user?.image ?? defaultImage}
         width={30}
         height={30}
         alt="user image"
+        className="hidden sm:block"
       />
-      <span>{session.user?.name}</span>
+      <span className="hidden sm:inline-block">{session.user?.name}</span>
       <button
-        className="ml-auto hover:scale-110"
+        className="sm:ml-auto hover:scale-110"
         onClick={() =>
           Swal.fire({
             title: `Log out from ${session.user?.name} account?`,
