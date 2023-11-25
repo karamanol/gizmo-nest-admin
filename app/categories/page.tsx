@@ -158,7 +158,7 @@ function CategoriesPage() {
       <label className="inline-block mb-1">
         {editingCategory
           ? `Editing the "${editingCategory.name}" category:`
-          : "Give a name to the new category:"}
+          : "Quickly create new category:"}
       </label>
       <form
         onSubmit={handleSubmit(createCategory)}
@@ -173,12 +173,7 @@ function CategoriesPage() {
             placeholder="Category name"
             disabled={isCreatingOrUpdating}
           />
-          <select
-            {...register("parentCat")}
-            className="mb-0"
-            // value={parentOption}
-            // onChange={(e) => setParentOption(e.target.value)}
-          >
+          <select {...register("parentCat")} className="mb-0">
             <option value={""}>Without parent</option>
             {categories.length > 0 &&
               // filter stands for excluding recursive relation when category has as parent itself
@@ -205,13 +200,13 @@ function CategoriesPage() {
                 { propertyName: "", propertyValuesAsOneString: "" },
               ])
             }
-            className="btn-default !bg-teal-700/70 !px-2 text-sm !py-1 mx-4 mt-4 mb-2 ">
+            className="bg-teal-700/70 px-2 text-sm py-1 mx-4 mt-4 mb-2 rounded-md text-gray-50 hover:bg-teal-700/80 transition-colors">
             Add property
           </button>
           {propertiesArray.length > 0 && (
             <button
               type="button"
-              className="btn-default !bg-red-800/60 !px-2 text-sm !py-1 mx-4 mt-4 mb-2"
+              className="bg-red-800/60 px-2 text-sm py-1 mx-4 mt-4 mb-2 rounded-md text-gray-50 hover:bg-red-800/70 transition-colors"
               onClick={() =>
                 setPropertiesArray((prev) => prev.slice(0, prev.length - 1))
               }>
@@ -262,7 +257,7 @@ function CategoriesPage() {
           })}>
           <button
             type="submit"
-            className="btn-primary"
+            className="btn-primary drop-shadow"
             disabled={isCreatingOrUpdating}>
             {editingCategory ? "Update" : "Add"}
           </button>
@@ -288,7 +283,7 @@ function CategoriesPage() {
         <>
           <table className="default sm:max-w-5xl table-auto">
             <thead>
-              <tr className="text-center">
+              <tr className="text-center text-gray-700">
                 <td>Category name</td>
                 <td>Parent category</td>
                 <td className="w-40">Action</td>
@@ -300,59 +295,87 @@ function CategoriesPage() {
                   <tr key={category._id}>
                     <td>{category.name}</td>
                     <td>{category.parentCat?.name}</td>
-                    <td className="flex gap-1 justify-evenly">
-                      <button
-                        disabled={isCreatingOrUpdating}
-                        onClick={() => {
-                          setEditingCategory(() => {
-                            setValue("category", category.name);
-                            setValue(
-                              "parentCat",
-                              category.parentCat?._id || ""
-                            );
-                            setPropertiesArray(
-                              category.properties?.map((property) => ({
-                                propertyName: property.propertyName,
-                                propertyValuesAsOneString:
-                                  property.propertyValuesArr.join(", "),
-                              })) || []
-                            );
+                    <td>
+                      <div className="flex gap-1 justify-evenly">
+                        <button
+                          disabled={isCreatingOrUpdating}
+                          onClick={() => {
+                            setEditingCategory(() => {
+                              setValue("category", category.name);
+                              setValue(
+                                "parentCat",
+                                category.parentCat?._id || ""
+                              );
+                              setPropertiesArray(
+                                category.properties?.map((property) => ({
+                                  propertyName: property.propertyName,
+                                  propertyValuesAsOneString:
+                                    property.propertyValuesArr.join(", "),
+                                })) || []
+                              );
 
-                            return category;
-                          });
-                        }}
-                        className="btn-primary">
-                        Edit
-                      </button>
-                      <button
-                        disabled={isCreatingOrUpdating}
-                        className="btn-primary"
-                        onClick={() =>
-                          Swal.fire({
-                            title: `Deleting "${category.name}". Are you sure?`,
-                            showCancelButton: true,
-                            showConfirmButton: true,
-                            confirmButtonText: "Yes!",
-                            confirmButtonColor: "#e11d48",
-                            animation: false,
-                          }).then((result) => {
-                            if (result.isConfirmed) {
-                              (async () => {
-                                const successfully = await deleteSomeCategory(
-                                  category._id
-                                );
-                                if (successfully) {
-                                  toast.success(
-                                    "Category deleted successfully"
+                              return category;
+                            });
+                          }}
+                          className="btn-primary flex gap-2 justify-center items-center !px-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-4 h-4 translate-y-[10%]">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                            />
+                          </svg>
+                          Edit
+                        </button>
+                        <button
+                          disabled={isCreatingOrUpdating}
+                          className="!px-2 btn-primary flex gap-2 justify-center items-center"
+                          onClick={() =>
+                            Swal.fire({
+                              title: `Deleting "${category.name}". Are you sure?`,
+                              showCancelButton: true,
+                              showConfirmButton: true,
+                              confirmButtonText: "Yes!",
+                              confirmButtonColor: "#e11d48",
+                              animation: false,
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                (async () => {
+                                  const successfully = await deleteSomeCategory(
+                                    category._id
                                   );
-                                  getCategories();
-                                }
-                              })();
-                            }
-                          })
-                        }>
-                        Delete
-                      </button>
+                                  if (successfully) {
+                                    toast.success(
+                                      "Category deleted successfully"
+                                    );
+                                    getCategories();
+                                  }
+                                })();
+                              }
+                            })
+                          }>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-5 h-5">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

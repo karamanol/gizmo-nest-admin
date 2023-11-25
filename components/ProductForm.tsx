@@ -270,7 +270,7 @@ function ProductForm({
       </label>
       <select
         id="category"
-        className="h-9"
+        className="h-9 bg-gray-50"
         disabled={isFetchingCategories}
         {...register("category")}>
         <option value="">Without category</option>
@@ -283,19 +283,19 @@ function ProductForm({
       </select>
 
       {action === "Update" && editingProductPropertiesToFill.length > 0 && (
-        <div className="flex flex-wrap gap-6 items-center mb-3">
-          <label className="text-lg">Properties:</label>
+        <div className="flex flex-wrap gap-4 mt-3 items-center mb-3">
+          <label className="text-lg block w-full">Properties:</label>
           {editingProductPropertiesToFill.map((propObj) => {
             return (
               <div key={propObj._id} className="flex gap-2 items-center ">
-                <label className="font-semibold text-gray-800">{`${propObj.propertyName}:`}</label>
+                <label className="font-semibold  text-gray-700 mr-3">{`${propObj.propertyName}:`}</label>
                 <select
                   defaultValue={
                     defaultValuesObj?.productProperties?.[
                       propObj?.["propertyName"]
                     ] || ""
                   }
-                  className="!m-0"
+                  className="!m-0 bg-gray-50"
                   onChange={(e) =>
                     handlePropertyChange(e, propObj.propertyName)
                   }>

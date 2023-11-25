@@ -41,11 +41,11 @@ export default function Products() {
         Add new product
       </Link>
 
-      <table className="default mt-4 sm:max-w-5xl table-auto">
+      <table className="default mt-4 sm:max-w-5xl table-auto ">
         <thead>
-          <tr>
-            <td>Product name</td>
-            <td className="w-52">Action</td>
+          <tr className="text-gray-700">
+            <td className="">Product name</td>
+            <td className="w-48">Action</td>
           </tr>
         </thead>
         <tbody>
@@ -54,7 +54,9 @@ export default function Products() {
               <td>{product?.name}</td>
               <td>
                 <div className="flex gap-1 justify-evenly">
-                  <Link href={"/products/edit/" + product._id}>
+                  <Link
+                    href={"/products/edit/" + product._id}
+                    className="!rounded-md">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -70,7 +72,9 @@ export default function Products() {
                     </svg>
                     <span className="mr-2 ml-1">Edit</span>
                   </Link>
-                  <Link href={"/products/delete/" + product._id}>
+                  <Link
+                    href={"/products/delete/" + product._id}
+                    className="!rounded-md">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"

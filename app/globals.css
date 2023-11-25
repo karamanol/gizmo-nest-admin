@@ -27,7 +27,7 @@ table.default thead tr td {
 }
 
 table.default tr td {
-  @apply border border-gray-300 bg-teal-100/10 p-1;
+  @apply border border-gray-300 bg-teal-100/10 py-1 px-2;
 }
 
 table.default a {
