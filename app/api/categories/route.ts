@@ -1,7 +1,9 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Category } from "@/models/Category";
 import { MongooseError } from "mongoose";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,7 @@ const prepare = (
 //?--------------POST-----------------
 export async function POST(request: NextRequest) {
   try {
+    await isAdmin(authOptions);
     await mongooseConnect();
     const data = await request.json();
     const {
@@ -60,6 +63,7 @@ export async function GET(request: NextRequest) {
 
 //?--------------PATCH----------------
 export async function PATCH(request: NextRequest) {
+  await isAdmin(authOptions);
   await mongooseConnect();
   try {
     const { category, parentCat, _id, propertiesArray } = await request.json();
@@ -84,6 +88,7 @@ export async function PATCH(request: NextRequest) {
 
 //?---------------------DELETE--------------------
 export async function DELETE(request: NextRequest) {
+  await isAdmin(authOptions);
   await mongooseConnect();
   try {
     const { searchParams } = new URL(request.url);

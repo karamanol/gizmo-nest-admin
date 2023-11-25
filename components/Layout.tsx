@@ -22,7 +22,7 @@ export default async function Layout({ children }: LayoutProps) {
     <div className="bg-[conic-gradient(at_left,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-400/80 to-orange-200 h-screen overflow-x-hidden flex ">
       <Navigation />
       <Toaster />
-      <div className="bg-gray-100/50 flex-grow mt-2 mr-2 mb-2 rounded-xl p-4 border border-gray-200/10 drop-shadow-sm overflow-auto">
+      <div className="bg-gray-100/50 flex-grow m-2 rounded-xl p-4 border border-gray-200/10 drop-shadow-sm overflow-auto">
         {children}
       </div>
     </div>

@@ -286,7 +286,7 @@ function CategoriesPage() {
         <SpinnerCircle />
       ) : !editingCategory ? (
         <>
-          <table className="default sm:max-w-5xl">
+          <table className="default sm:max-w-5xl table-auto">
             <thead>
               <tr className="text-center">
                 <td>Category name</td>

@@ -2,13 +2,15 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
 import { MongooseError } from "mongoose";
 import { NextRequest } from "next/server";
+import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
 
 export const dynamic = "force-dynamic";
 
 //?--------------POST-----------------
 export async function POST(request: NextRequest) {
-  await mongooseConnect();
   try {
+    await isAdmin(authOptions);
+    await mongooseConnect();
     const { name, price, description, discount, category } =
       await request.json();
     const newProduct = await Product.create({
@@ -51,8 +53,9 @@ export async function GET(request: Request) {
 
 //?------------------PATCH------------------------
 export async function PATCH(request: NextRequest) {
-  await mongooseConnect();
   try {
+    await isAdmin(authOptions);
+    await mongooseConnect();
     const {
       name,
       price,
@@ -87,8 +90,9 @@ export async function PATCH(request: NextRequest) {
 
 //?------------------------DELETE------------------------
 export async function DELETE(request: NextRequest) {
-  await mongooseConnect();
   try {
+    await isAdmin(authOptions);
+    await mongooseConnect();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return Response.json({ status: 404, error: "Id not found" });

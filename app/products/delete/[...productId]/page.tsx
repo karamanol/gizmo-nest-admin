@@ -74,7 +74,7 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
   }, [id, setProductName]);
 
   return productName ? (
-    <div className="sm:mr-[30%] ">
+    <div className="lg:mr-[30%] ">
       <h2 className="text-3xl text-center">
         Confirm deletion of product &quot;{productName}&quot;?
       </h2>

@@ -287,7 +287,7 @@ function ProductForm({
           <label className="text-lg">Properties:</label>
           {editingProductPropertiesToFill.map((propObj) => {
             return (
-              <div key={propObj._id} className="flex gap-2 items-center">
+              <div key={propObj._id} className="flex gap-2 items-center ">
                 <label className="font-semibold text-gray-800">{`${propObj.propertyName}:`}</label>
                 <select
                   defaultValue={

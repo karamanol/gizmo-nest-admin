@@ -3,6 +3,7 @@ import supabase from "@/lib/supabase";
 import { Product } from "@/models/Product";
 import { MongooseError } from "mongoose";
 import { NextRequest } from "next/server";
+import { authOptions, isAdmin } from "../../auth/[...nextauth]/route";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 // endpoint for deleting image from mongo and supabase
 export async function DELETE(request: NextRequest) {
   try {
+    await isAdmin(authOptions);
     await mongooseConnect();
     const url = new URL(request.url);
     const img = url.searchParams.get("img");
