@@ -91,7 +91,7 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
         </button>
         <button
           className="btn-default"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/products")}
           disabled={isDeleting}>
           Refuse
         </button>

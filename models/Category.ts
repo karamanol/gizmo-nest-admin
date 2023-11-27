@@ -11,11 +11,14 @@ const propertySchema = new Schema({
   },
 });
 
-const categorySchema = new Schema({
-  name: { type: String, required: [true, "Category must have a name"] },
-  parentCat: { type: mongoose.Types.ObjectId, ref: "Category" },
-  properties: { type: [propertySchema] },
-});
+const categorySchema = new Schema(
+  {
+    name: { type: String, required: [true, "Category must have a name"] },
+    parentCat: { type: mongoose.Types.ObjectId, ref: "Category" },
+    properties: { type: [propertySchema] },
+  },
+  { timestamps: true }
+);
 
 export const Category =
   mongoose.models.Category || mongoose.model("Category", categorySchema);

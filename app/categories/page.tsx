@@ -324,7 +324,7 @@ function CategoriesPage() {
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-4 h-4 translate-y-[10%]">
+                            className="w-4 h-4 ">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -335,7 +335,7 @@ function CategoriesPage() {
                         </button>
                         <button
                           disabled={isCreatingOrUpdating}
-                          className="!px-2 btn-primary flex gap-2 justify-center items-center"
+                          className="!px-2 btn-primary flex gap-2 justify-center items-center !bg-red-900/60 hover:opacity-90"
                           onClick={() =>
                             Swal.fire({
                               title: `Deleting "${category.name}". Are you sure?`,

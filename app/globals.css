@@ -15,7 +15,7 @@ select:focus {
 }
 
 .btn-primary {
-  @apply bg-teal-700 text-gray-50 py-1 px-3 rounded-md hover:bg-teal-600 transition-colors;
+  @apply bg-teal-700 text-gray-50 py-1 px-3 rounded-md hover:bg-teal-600 transition-all;
 }
 
 table.default {

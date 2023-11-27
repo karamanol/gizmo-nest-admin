@@ -56,7 +56,7 @@ export default function Products() {
                 <div className="flex gap-1 justify-evenly">
                   <Link
                     href={"/products/edit/" + product._id}
-                    className="!rounded-md">
+                    className="!rounded-md hover:bg-teal-600 transition-colors">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -74,7 +74,7 @@ export default function Products() {
                   </Link>
                   <Link
                     href={"/products/delete/" + product._id}
-                    className="!rounded-md">
+                    className="!rounded-md !bg-red-900/60 hover:opacity-90 transition-all">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
