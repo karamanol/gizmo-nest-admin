@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     let sortObj = {};
 
-    console.log("page", page);
+    // console.log("page", page);
 
     switch (sort) {
       case "new_first":
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       // otherwise, i had to make another separate request to get the count of orders in db
     ]);
 
-    console.log(orders);
+    // console.log(orders);
     return NextResponse.json(orders);
   } catch (err) {
     return Response.json({ error: getErrorMessage(err), status: 500 });

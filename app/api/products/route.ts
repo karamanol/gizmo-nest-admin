@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 }
 
 //?--------------GET--------------------
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   await mongooseConnect();
   try {
     const { searchParams } = new URL(request.url);
@@ -41,8 +41,14 @@ export async function GET(request: Request) {
       });
       return Response.json({ status: 200, data: product });
     }
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = 20;
+    const skip = (page - 1) * limit;
 
-    const products = await Product.find();
+    console.log(page);
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit + 1);
     return Response.json({ status: 200, data: products });
   } catch (err) {
     if (err instanceof Error || err instanceof MongooseError) {
