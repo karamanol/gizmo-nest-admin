@@ -43,14 +43,14 @@ export default function Products() {
 
       <table className="default mt-4 sm:max-w-5xl table-auto ">
         <thead>
-          <tr className="text-gray-700">
-            <td className="">Product name</td>
-            <td className="w-48">Action</td>
+          <tr className="text-gray-600">
+            <th className="">Product name</th>
+            <th className="w-48">Action</th>
           </tr>
         </thead>
         <tbody>
           {products?.map((product) => (
-            <tr key={product._id} className="">
+            <tr key={product._id} className="h-10">
               <td>{product?.name}</td>
               <td>
                 <div className="flex gap-1 justify-evenly">
@@ -96,7 +96,11 @@ export default function Products() {
           ))}
         </tbody>
       </table>
-      {!products && <SpinnerCircle />}
+      {!products && (
+        <div className="flex justify-center items-center h-[75vh] sm:max-w-5xl">
+          <SpinnerCircle />
+        </div>
+      )}
     </div>
   );
 }

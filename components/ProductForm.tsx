@@ -10,6 +10,8 @@ import supabase from "@/lib/supabase";
 import Image from "next/image";
 import { CategoryFromDB } from "@/app/categories/page";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { DeleteImageIcon } from "./styled-icons/DeleteImageIcon";
+import { UploadIcon } from "./styled-icons/UploadIcon";
 
 type ProductFormValues = {
   name: string;
@@ -114,7 +116,7 @@ function ProductForm({
     })();
   }, [setCategories, setIsFetchingCategories]);
 
-  // React-hook-form stuff
+  // React-hook-form utils
   const {
     register,
     handleSubmit,
@@ -183,7 +185,7 @@ function ProductForm({
     }
   }
 
-  //function to delete image from supabase
+  // function to delete image from supabase
   const deleteImageFromSupa = async (imgToDelete: string, prodId: string) => {
     const preparedString = imgToDelete.split("/").at(-1); // drop all except image name
     if (preparedString) {
@@ -230,9 +232,9 @@ function ProductForm({
     const allProperties = [
       ...(categoryPropeties || []),
       ...(parentCatPropeties || []),
-    ]; // properties from product category + properties of PARENT category of category
+    ]; // properties from product category + properties of PARENT category of current product category
 
-    // adding old properties of product to show on page as already selected
+    // adding old properties of product to show them on page as already selected
     const oldProductProperties = defaultValuesObj?.productProperties;
     if (oldProductProperties !== undefined) {
       setEditingProductPropertiesToSave(oldProductProperties);
@@ -411,60 +413,31 @@ function ProductForm({
         {...register("description")}
         placeholder="Description"
       />
-      <button
-        type="submit"
-        className="btn-primary flex gap-1"
-        disabled={isFetching}>
-        {isFetching ? (
-          <>
-            <span>{action}</span>
-            <div className="w-5 h-5 animate-spin border-b-2 rounded-full border-teal-500"></div>
-          </>
-        ) : (
-          action
-        )}
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          className="btn-primary flex gap-1"
+          disabled={isFetching}>
+          {isFetching ? (
+            <>
+              <span>{action}</span>
+              <div className="w-5 h-5 animate-spin border-b-2 rounded-full border-teal-500"></div>
+            </>
+          ) : (
+            action
+          )}
+        </button>
+        <button
+          type="button"
+          className="btn-primary !bg-gray-400 hover:!bg-gray-500/70"
+          onClick={() => {
+            router.back();
+          }}>
+          Go back
+        </button>
+      </div>
     </form>
   );
 }
 
 export default ProductForm;
-
-//-------------------------------ICONS -------------------------------
-function UploadIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1}
-      stroke="currentColor"
-      className={cn(
-        "w-6 h-6 group-hover:-translate-y-[2px] transition-transform"
-      )}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-      />
-    </svg>
-  );
-}
-
-const DeleteImageIcon = ({ processing }: { processing: boolean }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="red"
-      className={cn("w-full h-full", { "animate-spin": processing })}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
-};

@@ -19,15 +19,20 @@ select:focus {
 }
 
 table.default {
-  @apply w-full border-gray-400;
+  @apply w-full border-gray-500;
 }
 
-table.default thead tr td {
+table.default thead tr td,
+table.default thead tr th {
   @apply bg-teal-300/20;
 }
 
+table.default thead tr th {
+  @apply p-2;
+}
+
 table.default tr td {
-  @apply border border-gray-300 bg-teal-100/10 py-1 px-2;
+  @apply border border-gray-400/70 bg-teal-100/10 py-1 px-2;
 }
 
 table.default a {
@@ -53,4 +58,8 @@ table.default a {
 
 .activeLink {
   @apply flex gap-3 p-1 rounded-md bg-[#d9dee4] shadow-sm font-semibold hover:bg-[#dde2e9] transition-all;
+}
+
+.infoCell {
+  @apply inline-block border rounded-md border-gray-400 px-2 py-1 bg-gray-300/70;
 }

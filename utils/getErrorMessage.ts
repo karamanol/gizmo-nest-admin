@@ -12,7 +12,7 @@ export const getErrorMessage = function (err: unknown): string {
   } else if (typeof err === "string") {
     message = err;
   } else {
-    return "Unknown error: ";
+    return `Unknown error: ${String(err)}`;
   }
   return message;
 };

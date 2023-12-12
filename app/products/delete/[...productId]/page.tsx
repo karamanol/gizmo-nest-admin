@@ -98,7 +98,9 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
       </div>
     </div>
   ) : (
-    <SpinnerCircle />
+    <div className="flex justify-center items-center h-[50vh] sm:max-w-5xl">
+      <SpinnerCircle />
+    </div>
   );
 }
 

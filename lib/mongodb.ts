@@ -9,7 +9,7 @@ if (!process.env.MONGODB_URI) {
 const uri = process.env.MONGODB_URI;
 const options = {};
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 // just to remove typescript warning we use globalWithMongo instead of global
@@ -28,8 +28,15 @@ if (process.env.NODE_ENV === "development") {
 } else {
   // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = client.connect().catch((error) => {
+    console.error("Failed to connect to MongoDB server:", error);
+    process.exit(1);
+  });
 }
+
+process.on("exit", () => {
+  client.close();
+});
 
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.

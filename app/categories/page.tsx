@@ -59,7 +59,9 @@ function CategoriesPage() {
 
   // Fetching all categories
   useEffect(() => {
-    getCategories();
+    (async () => {
+      await getCategories();
+    })();
   }, [getCategories]);
 
   // Form handler function:
@@ -136,21 +138,45 @@ function CategoriesPage() {
     }
   };
 
-  // delete category click handler
+  // delete category fetcher
   const deleteSomeCategory = async (idToDelete: string) => {
     try {
-      const deleteResponse = await fetch("/api/categories?_id=" + idToDelete, {
-        method: "DELETE",
-      });
-      if (deleteResponse.ok) {
-        return { success: true };
+      const deleteResponse = await fetch(
+        "/api/categories?_id=" + `${idToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const parsedResponse = await deleteResponse.json();
+      if (deleteResponse.ok && !("error" in parsedResponse)) {
+        return "success";
       } else {
-        toast.error("Something went wrong");
+        return "fail";
       }
     } catch (err) {
       console.error(getErrorMessage(err));
     }
   };
+  // onClick handler that deletes the category
+  const handleDeleteCategoryWithModal = (id: string, name: string) =>
+    Swal.fire({
+      title: `Deleting "${name}". Are you sure?`,
+      showCancelButton: true,
+      showConfirmButton: true,
+      confirmButtonText: "Yes!",
+      confirmButtonColor: "#e11d48",
+      animation: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        (async () => {
+          const success = await deleteSomeCategory(id);
+          if (success === "success") {
+            toast.success("Category deleted successfully");
+            getCategories();
+          } else if (success === "fail") toast.error("Something went wrong");
+        })();
+      }
+    });
 
   return (
     <div>
@@ -278,15 +304,17 @@ function CategoriesPage() {
       </form>
 
       {isFetchingAllCategories ? (
-        <SpinnerCircle />
+        <div className="flex justify-center items-center h-[50vh]">
+          <SpinnerCircle />
+        </div>
       ) : !editingCategory ? (
         <>
           <table className="default sm:max-w-5xl table-auto">
             <thead>
-              <tr className="text-center text-gray-700">
-                <td>Category name</td>
-                <td>Parent category</td>
-                <td className="w-40">Action</td>
+              <tr className="text-center text-gray-600">
+                <th>Category name</th>
+                <th>Parent category</th>
+                <th className="w-40">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -337,28 +365,10 @@ function CategoriesPage() {
                           disabled={isCreatingOrUpdating}
                           className="!px-2 btn-primary flex gap-2 justify-center items-center !bg-red-900/60 hover:opacity-90"
                           onClick={() =>
-                            Swal.fire({
-                              title: `Deleting "${category.name}". Are you sure?`,
-                              showCancelButton: true,
-                              showConfirmButton: true,
-                              confirmButtonText: "Yes!",
-                              confirmButtonColor: "#e11d48",
-                              animation: false,
-                            }).then((result) => {
-                              if (result.isConfirmed) {
-                                (async () => {
-                                  const successfully = await deleteSomeCategory(
-                                    category._id
-                                  );
-                                  if (successfully) {
-                                    toast.success(
-                                      "Category deleted successfully"
-                                    );
-                                    getCategories();
-                                  }
-                                })();
-                              }
-                            })
+                            handleDeleteCategoryWithModal(
+                              category._id,
+                              category.name
+                            )
                           }>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
