@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* chrome scrollbar styling */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.396);
+  border-radius: 20px;
+  border: transparent;
+}
+
 input,
 textarea,
 select {

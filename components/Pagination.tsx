@@ -1,53 +1,52 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { SetStateAction } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { HiMiniArrowLongLeft, HiMiniArrowLongRight } from "react-icons/hi2";
 
 type PaginationProps = {
   page: number;
-  setPage: (value: SetStateAction<number>) => void;
   isDisabledNextBtn: boolean;
+  sortBy?: string;
 };
 
-function Pagination({ page, setPage, isDisabledNextBtn }: PaginationProps) {
+function Pagination({ page, isDisabledNextBtn, sortBy }: PaginationProps) {
+  const router = useRouter();
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      setPage(+event.currentTarget.value);
+      router.push(`?page=${event.currentTarget.value}`);
     }
   };
 
+  const sort = sortBy ? `&sort=${sortBy}` : "";
+
   return (
     <div className="flex gap-3 mt-5 justify-end mr-1 h-9">
-      <button
-        type="button"
-        className={cn(page < 2 ? "!bg-gray-400" : "", "btn-primary !px-6")}
-        onClick={() => {
-          setPage((prev) => Math.max(prev - 1, 1));
-        }}
-        disabled={page < 2}>
-        <HiMiniArrowLongLeft className="h-6 w-6" />
-      </button>
+      <Link
+        href={`?page=${Math.max(page - 1, 1)}` + sort}
+        className={cn(
+          page <= 1 ? "!bg-gray-400 pointer-events-none" : "",
+          "btn-primary !px-6 "
+        )}>
+        <HiMiniArrowLongLeft className="h-6 w-6 translate-y-[5%]" />
+      </Link>
 
       <input
         className="w-16 !mb-0"
-        defaultValue={page}
+        placeholder={page.toString()}
         type="number"
         onKeyDown={handleKeyPress}
       />
 
-      <button
-        type="button"
+      <Link
+        href={`?page=${page + 1}` + sort}
         className={cn(
-          isDisabledNextBtn ? "!bg-gray-400" : "",
+          isDisabledNextBtn ? "!bg-gray-400 pointer-events-none" : "",
           "btn-primary !px-6"
-        )}
-        onClick={() => {
-          setPage((prev) => prev + 1);
-        }}
-        disabled={isDisabledNextBtn}>
-        <HiMiniArrowLongRight className="h-6 w-6" />
-      </button>
+        )}>
+        <HiMiniArrowLongRight className="h-6 w-6 translate-y-[5%]" />
+      </Link>
     </div>
   );
 }

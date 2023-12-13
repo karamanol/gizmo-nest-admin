@@ -2,6 +2,7 @@
 
 import Pagination from "@/components/Pagination";
 import SpinnerCircle from "@/components/SpinnerCircle";
+import { useGetPageParams } from "@/hooks/useGetPageParams";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,28 +18,9 @@ type Product = {
 export default function Products() {
   const { 0: products, 1: setPoducts } = useState<Array<Product>>();
 
-  //================================================================
+  const page = useGetPageParams();
 
-  const searchParams = useSearchParams();
-  const searchParamsPageString = searchParams.get("page") || "";
-  const searchParamsPageStringIsValid = !isNaN(
-    parseInt(searchParamsPageString)
-  ); // making sure it is an integer
-
-  const { 0: page, 1: setPage } = useState(
-    searchParamsPageStringIsValid
-      ? Math.max(+searchParamsPageString, 1) // preventing case when page is set to negative number
-      : 1
-  );
-
-  useEffect(() => {
-    (() => {
-      if (typeof window === "undefined") return;
-      window.history.pushState(null, "", `?page=${page}`);
-    })();
-  }, [page]);
-
-  //================================================================
+  // console.log("page: ", page);
 
   useEffect(
     function () {
@@ -47,8 +29,9 @@ export default function Products() {
           const res = await fetch(`/api/products?page=${page}`, {
             method: "GET",
           });
-          if (res.ok) {
-            const data = await res.json();
+          if (!res.ok) throw new Error("Error fetching products");
+          const data = await res.json();
+          if ("data" in data) {
             setPoducts(data.data);
           }
         } catch (err) {
@@ -130,11 +113,20 @@ export default function Products() {
             <SpinnerCircle />
           </div>
         )}
+
+        {Array.isArray(products) && products.length === 0 ? (
+          <div className="flex justify-center my-10">
+            <span className="text-2xl text-gray-800">
+              No products to show on this page
+            </span>
+          </div>
+        ) : null}
+
         {(products?.length || 0) < 21 &&
         page === 1 ? null : !products ? null : (
           <Pagination
             page={page}
-            setPage={setPage}
+            // setPage={setPage}
             isDisabledNextBtn={(products?.length || 0) < 11}
           />
         )}

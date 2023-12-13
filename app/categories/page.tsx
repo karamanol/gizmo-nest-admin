@@ -158,7 +158,7 @@ function CategoriesPage() {
     }
   };
   // onClick handler that deletes the category
-  const handleDeleteCategoryWithModal = (id: string, name: string) =>
+  const handleDeleteCategoryWithModal = (id: string, name: string) => {
     Swal.fire({
       title: `Deleting "${name}". Are you sure?`,
       showCancelButton: true,
@@ -177,6 +177,7 @@ function CategoriesPage() {
         })();
       }
     });
+  };
 
   return (
     <div>

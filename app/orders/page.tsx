@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import Swal from "sweetalert2";
 import Pagination from "@/components/Pagination";
+import { useGetPageParams } from "@/hooks/useGetPageParams";
 
 type OrderedProductType = {
   _id: string;
@@ -44,6 +45,8 @@ const sortByStrings = [
   "not_delivered_first",
 ];
 
+const ORDERS_PER_PAGE = 10;
+
 function OrdersPage() {
   const { 0: orders, 1: setOrders } = useState<Array<OrderType>>([]);
   const { 0: isLoading, 1: setIsLoading } = useState(false);
@@ -53,38 +56,30 @@ function OrdersPage() {
   const searchParamsSortStringIsValid = sortByStrings.includes(
     searchParamsSortString
   );
-  const searchParamsPageString = searchParams.get("page") || "";
-  const searchParamsPageStringIsValid = !isNaN(
-    parseInt(searchParamsPageString)
-  ); // making sure it is an integer
 
-  const { 0: page, 1: setPage } = useState(
-    searchParamsPageStringIsValid
-      ? Math.max(+searchParamsPageString, 1) // preventing case when page is set to negative number
-      : 1
-  );
   const { 0: sortBy, 1: setSortBy } = useState<string>(
     searchParamsSortStringIsValid ? searchParamsSortString : "new_first"
   );
 
-  // synchronization between sortBy, page and params
+  const page = useGetPageParams();
+
+  // synchronization between sortBy and params
   useEffect(() => {
     (() => {
       if (typeof window === "undefined") return;
       if (sortByStrings.includes(sortBy)) {
-        window.history.pushState(null, "", `?sort=${sortBy}&page=${page}`);
+        window.history.pushState(null, "", `?page=${page}&sort=${sortBy}`);
       }
     })();
   }, [sortBy, page]);
 
   // fetching orders data for table
-
   const getOrders = useCallback(
     async (sortBy: string) => {
       try {
         setIsLoading(true);
         if (!sortBy) return;
-        const url = `/api/orders?sort=${sortBy}&page=${page}`;
+        const url = `/api/orders?page=${page}&sort=${sortBy}`;
         const resp = await fetch(url, { method: "GET" });
         const ordersData = await resp.json();
         if (Array.isArray(ordersData)) setOrders(ordersData);
@@ -179,6 +174,31 @@ function OrdersPage() {
       console.error(getErrorMessage(err));
     }
   };
+  const handleDeleteAllUnpaid = async () => {
+    Swal.fire({
+      title: `Deleting all unpaid orders. Are you sure?`,
+      showCancelButton: true,
+      showConfirmButton: true,
+      confirmButtonText: "Yes!",
+      confirmButtonColor: "#e11d48",
+      animation: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        (async () => {
+          const data = await fetch("/api/orders/delete-all-unpaid", {
+            method: "DELETE",
+          });
+          const body = await data.json();
+
+          if ("success" in body && body.success === "success") {
+            toast.success("All unpaid orders deleted successfully");
+            getOrders(sortBy);
+          } else if ("success" in body && body.success === "fail")
+            toast.error("Something went wrong");
+        })();
+      }
+    });
+  };
 
   return (
     <div className="">
@@ -188,10 +208,10 @@ function OrdersPage() {
         </div>
       ) : (
         <>
-          <div className="flex m-2 gap-2">
+          <div className="flex m-2 gap-2 h-12 items-center">
             <span className="text-xl">Sort by:</span>
             <select
-              className="!w-fit"
+              className="!w-fit m-0"
               value={sortBy} //?
               onChange={(e) => {
                 setSortBy(e.target.value);
@@ -205,6 +225,12 @@ function OrdersPage() {
                 Undelivered orders first
               </option>
             </select>
+            <button
+              className="btn-primary ml-auto"
+              type="button"
+              onClick={handleDeleteAllUnpaid}>
+              Delete all unpaid orders
+            </button>
           </div>
           <table className="default table-auto ">
             <thead>
@@ -212,7 +238,7 @@ function OrdersPage() {
                 <th>Time and status</th>
                 <th>Recipient info</th>
                 <th>Ordered products</th>
-                <th>Actions</th>
+                <th className="w-[15%]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -325,11 +351,18 @@ function OrdersPage() {
                 : null}
             </tbody>
           </table>
-          {orders.length < 11 && page === 1 ? null : (
+          {Array.isArray(orders) && orders.length === 0 ? (
+            <div className="flex justify-center my-10">
+              <span className="text-2xl text-gray-800">
+                No orders to show on this page
+              </span>
+            </div>
+          ) : null}
+
+          {orders.length <= ORDERS_PER_PAGE && page === 1 ? null : (
             <Pagination
               page={page}
-              setPage={setPage}
-              isDisabledNextBtn={orders.length < 11}
+              isDisabledNextBtn={orders.length <= ORDERS_PER_PAGE}
             />
           )}
         </>
