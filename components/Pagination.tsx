@@ -13,18 +13,21 @@ type PaginationProps = {
 
 function Pagination({ page, isDisabledNextBtn, sortBy }: PaginationProps) {
   const router = useRouter();
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      router.push(`?page=${event.currentTarget.value}`);
-    }
-  };
 
   const sort = sortBy ? `&sort=${sortBy}` : "";
+  const prevPage = `?page=${Math.max(page - 1, 1)}` + sort;
+  const nextPage = `?page=${page + 1}` + sort;
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      router.push(`?page=${event.currentTarget.value}` + sort);
+    }
+  };
 
   return (
     <div className="flex gap-3 mt-5 justify-end mr-1 h-9">
       <Link
-        href={`?page=${Math.max(page - 1, 1)}` + sort}
+        href={prevPage}
         className={cn(
           page <= 1 ? "!bg-gray-400 pointer-events-none" : "",
           "btn-primary !px-6 "
@@ -40,7 +43,7 @@ function Pagination({ page, isDisabledNextBtn, sortBy }: PaginationProps) {
       />
 
       <Link
-        href={`?page=${page + 1}` + sort}
+        href={nextPage}
         className={cn(
           isDisabledNextBtn ? "!bg-gray-400 pointer-events-none" : "",
           "btn-primary !px-6"

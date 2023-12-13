@@ -3,13 +3,14 @@
 import SpinnerCircle from "@/components/SpinnerCircle";
 import { cn } from "@/lib/cn";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
 import Swal from "sweetalert2";
 import Pagination from "@/components/Pagination";
 import { useGetPageParams } from "@/hooks/useGetPageParams";
+import { useGetSortParams } from "@/hooks/useGetSortParams";
 
 type OrderedProductType = {
   _id: string;
@@ -36,42 +37,17 @@ type OrderType = {
   createdAt: string;
 };
 
-const sortByStrings = [
-  "new_first",
-  "old_first",
-  "paid_first",
-  "not_paid_first",
-  "delivered_first",
-  "not_delivered_first",
-];
-
 const ORDERS_PER_PAGE = 10;
 
 function OrdersPage() {
   const { 0: orders, 1: setOrders } = useState<Array<OrderType>>([]);
   const { 0: isLoading, 1: setIsLoading } = useState(false);
 
-  const searchParams = useSearchParams();
-  const searchParamsSortString = searchParams.get("sort") || "";
-  const searchParamsSortStringIsValid = sortByStrings.includes(
-    searchParamsSortString
-  );
-
-  const { 0: sortBy, 1: setSortBy } = useState<string>(
-    searchParamsSortStringIsValid ? searchParamsSortString : "new_first"
-  );
-
+  const router = useRouter();
+  const sorting = useGetSortParams();
   const page = useGetPageParams();
 
-  // synchronization between sortBy and params
-  useEffect(() => {
-    (() => {
-      if (typeof window === "undefined") return;
-      if (sortByStrings.includes(sortBy)) {
-        window.history.pushState(null, "", `?page=${page}&sort=${sortBy}`);
-      }
-    })();
-  }, [sortBy, page]);
+  console.log(orders);
 
   // fetching orders data for table
   const getOrders = useCallback(
@@ -95,12 +71,12 @@ function OrdersPage() {
   useEffect(() => {
     (async () => {
       try {
-        await getOrders(sortBy);
+        await getOrders(sorting);
       } catch (err) {
         toast.error(getErrorMessage(err));
       }
     })();
-  }, [getOrders, sortBy]);
+  }, [getOrders, sorting]);
 
   // delete order fetcher
   const deleteSomeOrder = async (idToDelete: string) => {
@@ -134,14 +110,14 @@ function OrdersPage() {
             const success = await cb();
             if (success === "success") {
               toast.success("Done!");
-              getOrders(sortBy);
+              getOrders(sorting);
             } else if (success === "fail") {
               toast.error("Something went wrong");
             }
           })();
         }
       }),
-    [getOrders, sortBy]
+    [getOrders, sorting]
   );
   // patch the order
   const updateOrder = async (
@@ -174,6 +150,7 @@ function OrdersPage() {
       console.error(getErrorMessage(err));
     }
   };
+
   const handleDeleteAllUnpaid = async () => {
     Swal.fire({
       title: `Deleting all unpaid orders. Are you sure?`,
@@ -192,7 +169,7 @@ function OrdersPage() {
 
           if ("success" in body && body.success === "success") {
             toast.success("All unpaid orders deleted successfully");
-            getOrders(sortBy);
+            getOrders(sorting);
           } else if ("success" in body && body.success === "fail")
             toast.error("Something went wrong");
         })();
@@ -212,9 +189,9 @@ function OrdersPage() {
             <span className="text-xl">Sort by:</span>
             <select
               className="!w-fit m-0"
-              value={sortBy} //?
+              value={sorting}
               onChange={(e) => {
-                setSortBy(e.target.value);
+                router.push(`?page=${page}&sort=${e.target.value}`);
               }}>
               <option value={"new_first"}>Newest first</option>
               <option value={"old_first"}>Oldest first</option>
@@ -351,16 +328,17 @@ function OrdersPage() {
                 : null}
             </tbody>
           </table>
-          {Array.isArray(orders) && orders.length === 0 ? (
+          {Array.isArray(orders) && orders.length === 0 && !isLoading ? (
             <div className="flex justify-center my-10">
               <span className="text-2xl text-gray-800">
-                No orders to show on this page
+                No orders to show on this page...
               </span>
             </div>
           ) : null}
 
           {orders.length <= ORDERS_PER_PAGE && page === 1 ? null : (
             <Pagination
+              sortBy={sorting}
               page={page}
               isDisabledNextBtn={orders.length <= ORDERS_PER_PAGE}
             />
