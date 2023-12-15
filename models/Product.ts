@@ -9,6 +9,9 @@ const productSchema = new mongoose.Schema(
     discount: { type: Number },
     category: { type: mongoose.Types.ObjectId, ref: "Category" },
     productProperties: { type: Object, default: {} },
+    specs: { type: String },
+    soldout: { type: Boolean, default: false },
+    promoted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

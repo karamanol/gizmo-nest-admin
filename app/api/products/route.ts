@@ -11,15 +11,18 @@ export async function POST(request: NextRequest) {
   try {
     await isAdmin(authOptions);
     await mongooseConnect();
-    const { name, price, description, discount, category } =
+    const { name, price, description, discount, category, specs } =
       await request.json();
+
     const newProduct = await Product.create({
       name,
       description,
       price,
       discount,
+      specs,
       ...(category ? { category } : { $unset: { category: "" } }), // when no category is specified - no category to be set on product
     });
+    console.log(newProduct);
     return Response.json({ status: 200, data: newProduct });
   } catch (err) {
     if (err instanceof Error || err instanceof MongooseError) {
@@ -71,6 +74,9 @@ export async function PATCH(request: NextRequest) {
       discount,
       category,
       productProperties,
+      specs,
+      soldout,
+      promoted,
     } = await request.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -83,6 +89,9 @@ export async function PATCH(request: NextRequest) {
         discount,
         productProperties,
         ...(category ? { category } : { $unset: { category: "" } }), // when no category is specified - no category to be set on product
+        specs,
+        soldout,
+        promoted,
       },
       { new: true, runValidators: true }
     );

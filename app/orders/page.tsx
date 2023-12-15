@@ -44,8 +44,8 @@ function OrdersPage() {
   const { 0: isLoading, 1: setIsLoading } = useState(false);
 
   const router = useRouter();
-  const sorting = useGetSortParams();
-  const page = useGetPageParams();
+  const sortingBy = useGetSortParams();
+  const pageNum = useGetPageParams();
 
   console.log(orders);
 
@@ -55,7 +55,10 @@ function OrdersPage() {
       try {
         setIsLoading(true);
         if (!sortBy) return;
-        const url = `/api/orders?page=${page}&sort=${sortBy}`;
+        const url = `/api/orders?${new URLSearchParams({
+          page: pageNum.toString(),
+          sort: sortBy,
+        })}`;
         const resp = await fetch(url, { method: "GET" });
         const ordersData = await resp.json();
         if (Array.isArray(ordersData)) setOrders(ordersData);
@@ -65,18 +68,18 @@ function OrdersPage() {
         setIsLoading(false);
       }
     },
-    [setIsLoading, setOrders, page]
+    [setIsLoading, setOrders, pageNum]
   );
 
   useEffect(() => {
     (async () => {
       try {
-        await getOrders(sorting);
+        await getOrders(sortingBy);
       } catch (err) {
         toast.error(getErrorMessage(err));
       }
     })();
-  }, [getOrders, sorting]);
+  }, [getOrders, sortingBy]);
 
   // delete order fetcher
   const deleteSomeOrder = async (idToDelete: string) => {
@@ -110,14 +113,14 @@ function OrdersPage() {
             const success = await cb();
             if (success === "success") {
               toast.success("Done!");
-              getOrders(sorting);
+              getOrders(sortingBy);
             } else if (success === "fail") {
               toast.error("Something went wrong");
             }
           })();
         }
       }),
-    [getOrders, sorting]
+    [getOrders, sortingBy]
   );
   // patch the order
   const updateOrder = async (
@@ -169,7 +172,7 @@ function OrdersPage() {
 
           if ("success" in body && body.success === "success") {
             toast.success("All unpaid orders deleted successfully");
-            getOrders(sorting);
+            getOrders(sortingBy);
           } else if ("success" in body && body.success === "fail")
             toast.error("Something went wrong");
         })();
@@ -189,9 +192,15 @@ function OrdersPage() {
             <span className="text-xl">Sort by:</span>
             <select
               className="!w-fit m-0"
-              value={sorting}
+              value={sortingBy}
               onChange={(e) => {
-                router.push(`?page=${page}&sort=${e.target.value}`);
+                // router.push(`?page=${pageNum}&sort=${e.target.value}`);
+                router.push(
+                  `?${new URLSearchParams({
+                    page: pageNum.toString(),
+                    sort: e.target.value,
+                  })}`
+                );
               }}>
               <option value={"new_first"}>Newest first</option>
               <option value={"old_first"}>Oldest first</option>
@@ -336,10 +345,10 @@ function OrdersPage() {
             </div>
           ) : null}
 
-          {orders.length <= ORDERS_PER_PAGE && page === 1 ? null : (
+          {orders.length <= ORDERS_PER_PAGE && pageNum === 1 ? null : (
             <Pagination
-              sortBy={sorting}
-              page={page}
+              sortBy={sortingBy}
+              page={pageNum}
               isDisabledNextBtn={orders.length <= ORDERS_PER_PAGE}
             />
           )}

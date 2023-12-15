@@ -1,7 +1,6 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Category } from "@/models/Category";
 import { MongooseError } from "mongoose";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
 

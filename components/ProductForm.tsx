@@ -12,6 +12,9 @@ import { CategoryFromDB } from "@/app/categories/page";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { DeleteImageIcon } from "./styled-icons/DeleteImageIcon";
 import { UploadIcon } from "./styled-icons/UploadIcon";
+import { fetchProductDescription } from "@/services/getFromGsmArena";
+import Swal from "sweetalert2";
+import { isValidJSON } from "@/utils/isValidJson";
 
 type ProductFormValues = {
   name: string;
@@ -20,6 +23,9 @@ type ProductFormValues = {
   images?: string[];
   discount: string;
   category: string;
+  specs?: string;
+  soldout: boolean;
+  promoted: boolean;
 };
 type CategoryType = {
   _id: string;
@@ -37,6 +43,9 @@ type DefaultValuesObjType = {
   discount: number;
   category: CategoryType;
   productProperties: { [key: string]: string };
+  specs?: string;
+  soldout: boolean;
+  promoted: boolean;
 };
 type CategoryPropertiesType = {
   _id: string;
@@ -132,13 +141,15 @@ function ProductForm({
       setIsFetching(true);
       let resp;
       try {
+        // CREATE NEW PRODUCT
         if (action === "Create") {
           resp = await fetch("/api/products", {
             method: "POST",
             body: JSON.stringify(data),
             headers: { "Content-Type": "application/json" },
           });
-        } else if (action === "Update") {
+        } // UPDATE EXISTING PRODUCT
+        else if (action === "Update") {
           resp = await fetch("/api/products", {
             method: "PATCH",
             body: JSON.stringify({
@@ -247,6 +258,17 @@ function ProductForm({
     setEditingProductPropertiesToSave,
   ]);
 
+  // button handler for searching product description on web
+  const handleSearchProductInfo = async (name: string | undefined) => {
+    const html = await fetchProductDescription(name);
+    Swal.fire({
+      title: "Result:",
+      html: html || "No data found :(",
+      animation: false,
+      confirmButtonColor: "#0d9488",
+    });
+  };
+
   return action === "Update" && !defaultValuesObj ? (
     <SpinnerCircle />
   ) : (
@@ -338,6 +360,7 @@ function ProductForm({
       {errors?.discount?.message && (
         <span className="ml-4 text-red-700">{errors.discount.message}</span>
       )}
+
       <input
         id="discount"
         type="number"
@@ -347,6 +370,35 @@ function ProductForm({
         defaultValue={defaultValuesObj?.discount || "0"}
         disabled={isFetching}
       />
+
+      {action === "Update" && (
+        <>
+          <section className="flex justify-start items-center gap-2 mb-3 ">
+            <input
+              id="soldout"
+              {...register("soldout")}
+              type="checkbox"
+              defaultChecked={defaultValuesObj?.soldout}
+              className="w-fit m-0"
+            />
+            <label htmlFor="soldout" className="text-lg">
+              Sold out?
+            </label>
+          </section>
+          <section className="flex justify-start items-center gap-2 mb-3 ">
+            <input
+              id="promoted"
+              {...register("promoted")}
+              type="checkbox"
+              defaultChecked={defaultValuesObj?.promoted}
+              className="w-fit m-0"
+            />
+            <label htmlFor="soldout" className="text-lg">
+              Mark as promoted on home page?
+            </label>
+          </section>
+        </>
+      )}
 
       {action === "Update" && (
         <>
@@ -406,13 +458,42 @@ function ProductForm({
       <label htmlFor="description" className="text-lg">
         Product description:
       </label>
+
       <textarea
+        className="mt-2"
         defaultValue={defaultValuesObj?.description}
         disabled={isFetching}
         id="description"
         {...register("description")}
         placeholder="Description"
       />
+
+      <label htmlFor="specs" className="text-lg">
+        {"Specs in JSON format:"}
+      </label>
+      {action === "Update" && (
+        <button
+          className="bg-white hover:bg-gray-100 px-2 py-1 rounded-md ml-4 transition-colors"
+          type="button"
+          onClick={() => handleSearchProductInfo(defaultValuesObj?.name)}>
+          Try to find additional info on GSM Arena
+        </button>
+      )}
+
+      {errors?.specs?.message && (
+        <span className=" text-red-700 block">{errors.specs.message}</span>
+      )}
+      <textarea
+        className="mt-2"
+        defaultValue={defaultValuesObj?.specs ?? ""}
+        disabled={isFetching}
+        id="specs"
+        {...register("specs", {
+          validate: (val) => isValidJSON(val) || "Wrong format!",
+        })}
+        placeholder={'{"Screen":"2400:1080","Weight":"230g", ... }'}
+      />
+
       <div className="flex gap-3">
         <button
           type="submit"
