@@ -47,7 +47,7 @@ function OrdersPage() {
   const sortingBy = useGetSortParams();
   const pageNum = useGetPageParams();
 
-  console.log(orders);
+  // console.log(orders);
 
   // fetching orders data for table
   const getOrders = useCallback(

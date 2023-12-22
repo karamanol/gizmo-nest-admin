@@ -6,62 +6,49 @@ import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
 
 // export const dynamic = "force-dynamic";
 
+const sortingOptions = {
+  new_first: {
+    updatedAt: -1,
+  },
+  old_first: {
+    updatedAt: 1,
+  },
+  paid_first: {
+    paid: -1,
+    updatedAt: -1,
+  },
+  not_paid_first: {
+    paid: 1,
+    updatedAt: -1,
+  },
+  delivered_first: {
+    delivered: -1,
+    updatedAt: -1,
+  },
+  not_delivered_first: {
+    delivered: 1,
+    updatedAt: -1,
+  },
+  default: {
+    updatedAt: -1,
+  },
+};
+
 export async function GET(request: NextRequest) {
   try {
     await isAdmin(authOptions);
     await mongooseConnect();
 
     const { searchParams } = new URL(request.url);
-    const sort = searchParams.get("sort");
+    const sort = searchParams.get("sort") || "";
     const page = parseInt(searchParams.get("page") || "1");
 
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    let sortObj = {};
-
-    // console.log("page", page);
-
-    switch (sort) {
-      case "new_first":
-        sortObj = {
-          updatedAt: -1, // -1 means order
-        };
-        break;
-      case "old_first":
-        sortObj = {
-          updatedAt: 1,
-        };
-        break;
-      case "paid_first":
-        sortObj = {
-          paid: -1,
-          updatedAt: -1,
-        };
-        break;
-      case "not_paid_first":
-        sortObj = {
-          paid: 1,
-          updatedAt: -1,
-        };
-        break;
-      case "delivered_first":
-        sortObj = {
-          delivered: -1,
-          updatedAt: -1,
-        };
-        break;
-      case "not_delivered_first":
-        sortObj = {
-          delivered: 1,
-          updatedAt: -1,
-        };
-        break;
-      default:
-        sortObj = {
-          updatedAt: -1, // -1 means order
-        };
-    }
+    const sortObj =
+      //@ts-ignore
+      sort in sortingOptions ? sortingOptions[sort] : sortingOptions["default"];
 
     const orders = await Order.aggregate([
       {

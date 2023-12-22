@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* chrome scrollbar styling */
 ::-webkit-scrollbar {
   width: 9px;

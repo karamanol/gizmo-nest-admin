@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     const limit = 20;
     const skip = (page - 1) * limit;
 
-    console.log(page);
+    // console.log(page);
     const products = await Product.find()
       .skip(skip)
       .limit(limit + 1);

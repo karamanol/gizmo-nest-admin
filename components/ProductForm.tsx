@@ -12,7 +12,7 @@ import { CategoryFromDB } from "@/app/categories/page";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { DeleteImageIcon } from "./styled-icons/DeleteImageIcon";
 import { UploadIcon } from "./styled-icons/UploadIcon";
-import { fetchProductDescription } from "@/services/getFromGsmArena";
+import { fetchProductInfo } from "@/services/getFromGsmArena";
 import Swal from "sweetalert2";
 import { isValidJSON } from "@/utils/isValidJson";
 
@@ -63,31 +63,19 @@ function ProductForm({
   action,
   productId,
 }: ProductFormProps) {
-  const { 0: isFetching, 1: setIsFetching } = useState(false);
-  const { 0: newImgNamesArray, 1: setImgNamesArray } = useState<Array<string>>(
-    []
-  );
-  const { 0: oldImgNamesArray, 1: setOldImgNamesArray } = useState<
-    Array<string>
-  >([]);
-  const { 0: newAndOldImgArray, 1: setNewAndOldImgArray } = useState<
-    Array<string>
-  >([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [newImgNamesArray, setImgNamesArray] = useState<Array<string>>([]);
+  const [oldImgNamesArray, setOldImgNamesArray] = useState<Array<string>>([]);
+  const [newAndOldImgArray, setNewAndOldImgArray] = useState<Array<string>>([]);
+  const [categories, setCategories] = useState<Array<CategoryFromDB>>([]);
+  const [isFetchingCategories, setIsFetchingCategories] = useState(false);
+  const [deletingImage, setDeletingImage] = useState("");
+  const [editingProductPropertiesToFill, setEditingProductPropertiesToFill] =
+    useState<CategoryPropertiesType>([]);
+  const [editingProductPropertiesToSave, setEditingProductPropertiesToSave] =
+    useState<{ [key: string]: string }>({});
 
-  const { 0: categories, 1: setCategories } = useState<Array<CategoryFromDB>>(
-    []
-  );
-  const { 0: isFetchingCategories, 1: setIsFetchingCategories } =
-    useState(false);
-  const { 0: isDeletingImage, 1: setIsDeletingImage } = useState("");
-  const {
-    0: editingProductPropertiesToFill,
-    1: setEditingProductPropertiesToFill,
-  } = useState<CategoryPropertiesType>([]);
-  const {
-    0: editingProductPropertiesToSave,
-    1: setEditingProductPropertiesToSave,
-  } = useState<{ [key: string]: string }>({});
+  const router = useRouter();
 
   // set old images from db if they are
   useEffect(() => {
@@ -132,8 +120,6 @@ function ProductForm({
     formState: { errors },
     setValue,
   } = useForm<ProductFormValues>();
-
-  const router = useRouter();
 
   // onSubmit form function
   const createOrUpdateProduct: SubmitHandler<ProductFormValues> =
@@ -200,7 +186,7 @@ function ProductForm({
   const deleteImageFromSupa = async (imgToDelete: string, prodId: string) => {
     const preparedString = imgToDelete.split("/").at(-1); // drop all except image name
     if (preparedString) {
-      setIsDeletingImage(imgToDelete);
+      setDeletingImage(imgToDelete);
       const resp = await fetch(
         `/api/products/delete-image?img=${preparedString}&prodId=${prodId}`,
         {
@@ -208,7 +194,7 @@ function ProductForm({
         }
       );
       const data = await resp.json();
-      setIsDeletingImage("");
+      setDeletingImage("");
       if ("message" in data) {
         return data.message;
       } else if ("error" in data) {
@@ -259,8 +245,13 @@ function ProductForm({
   ]);
 
   // button handler for searching product description on web
-  const handleSearchProductInfo = async (name: string | undefined) => {
-    const html = await fetchProductDescription(name);
+  const handleSearchProductInfo = async (
+    name: string | undefined,
+    type: "specs" | "description"
+  ) => {
+    const devicesHtmlArr = await fetchProductInfo(name, type);
+    console.log(devicesHtmlArr);
+    const html = devicesHtmlArr?.join("<br><br>");
     Swal.fire({
       title: "Result:",
       html: html || "No data found :(",
@@ -423,7 +414,7 @@ function ProductForm({
                   <button
                     className={cn(
                       "rounded-lg absolute z-50 opacity-0 hover:opacity-40 hover:bg-slate-400 transition-all cursor-pointer",
-                      { "opacity-40": isDeletingImage === el }
+                      { "opacity-40": deletingImage === el }
                     )}
                     type="button"
                     onClick={async () => {
@@ -439,7 +430,7 @@ function ProductForm({
                         toast.error(result);
                       }
                     }}>
-                    <DeleteImageIcon processing={isDeletingImage === el} />
+                    <DeleteImageIcon processing={deletingImage === el} />
                   </button>
                   <Image
                     fill
@@ -458,6 +449,16 @@ function ProductForm({
       <label htmlFor="description" className="text-lg">
         Product description:
       </label>
+      {action === "Update" && (
+        <button
+          className="bg-white hover:bg-gray-100 px-2 py-1 rounded-md ml-4 transition-colors"
+          type="button"
+          onClick={() =>
+            handleSearchProductInfo(defaultValuesObj?.name, "description")
+          }>
+          Try to find description on GSM Arena
+        </button>
+      )}
 
       <textarea
         className="mt-2"
@@ -475,7 +476,9 @@ function ProductForm({
         <button
           className="bg-white hover:bg-gray-100 px-2 py-1 rounded-md ml-4 transition-colors"
           type="button"
-          onClick={() => handleSearchProductInfo(defaultValuesObj?.name)}>
+          onClick={() =>
+            handleSearchProductInfo(defaultValuesObj?.name, "specs")
+          }>
           Try to find additional info on GSM Arena
         </button>
       )}
