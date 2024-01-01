@@ -10,8 +10,8 @@ import supabase from "@/lib/supabase";
 import Image from "next/image";
 import { CategoryFromDB } from "@/app/categories/page";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { DeleteImageIcon } from "./styled-icons/DeleteImageIcon";
-import { UploadIcon } from "./styled-icons/UploadIcon";
+import { DeleteImageIcon } from "./icons/DeleteImageIcon";
+import { UploadIcon } from "./icons/UploadIcon";
 import { fetchProductInfo } from "@/services/getFromGsmArena";
 import Swal from "sweetalert2";
 import { isValidJSON } from "@/utils/isValidJson";
@@ -127,14 +127,14 @@ function ProductForm({
       setIsFetching(true);
       let resp;
       try {
-        // CREATE NEW PRODUCT
+        // CREATE NEW PRODUCT CASE
         if (action === "Create") {
           resp = await fetch("/api/products", {
             method: "POST",
             body: JSON.stringify(data),
             headers: { "Content-Type": "application/json" },
           });
-        } // UPDATE EXISTING PRODUCT
+        } // UPDATE EXISTING PRODUCT CASE
         else if (action === "Update") {
           resp = await fetch("/api/products", {
             method: "PATCH",
@@ -250,7 +250,6 @@ function ProductForm({
     type: "specs" | "description"
   ) => {
     const devicesHtmlArr = await fetchProductInfo(name, type);
-    console.log(devicesHtmlArr);
     const html = devicesHtmlArr?.join("<br><br>");
     Swal.fire({
       title: "Result:",
@@ -461,7 +460,7 @@ function ProductForm({
       )}
 
       <textarea
-        className="mt-2"
+        className="mt-2 h-32"
         defaultValue={defaultValuesObj?.description}
         disabled={isFetching}
         id="description"
@@ -487,7 +486,7 @@ function ProductForm({
         <span className=" text-red-700 block">{errors.specs.message}</span>
       )}
       <textarea
-        className="mt-2"
+        className="mt-2 h-32"
         defaultValue={defaultValuesObj?.specs ?? ""}
         disabled={isFetching}
         id="specs"

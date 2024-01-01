@@ -4,7 +4,6 @@ import Pagination from "@/components/Pagination";
 import SpinnerCircle from "@/components/SpinnerCircle";
 import { useGetPageParams } from "@/hooks/useGetPageParams";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast/headless";
 
@@ -16,12 +15,10 @@ type Product = {
 };
 
 export default function Products() {
-  const { 0: products, 1: setPoducts } = useState<Array<Product>>();
-  const { 0: isLoading, 1: setIsLoading } = useState(false);
+  const [products, setPoducts] = useState<Array<Product>>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const page = useGetPageParams();
-
-  // console.log("page: ", page);
 
   useEffect(
     function () {
@@ -132,7 +129,7 @@ export default function Products() {
           <Pagination
             page={page}
             // setPage={setPage}
-            isDisabledNextBtn={(products?.length || 0) < 11}
+            isDisabledNextBtn={(products?.length || 0) < 21}
           />
         )}
       </div>

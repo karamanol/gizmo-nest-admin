@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
 
     // console.log(page);
     const products = await Product.find()
+      .sort({ createdAt: "desc" })
       .skip(skip)
       .limit(limit + 1);
     return Response.json({ status: 200, data: products });
