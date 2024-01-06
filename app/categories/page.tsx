@@ -17,16 +17,13 @@ export type CategoryFromDB = {
 };
 
 function CategoriesPage() {
-  const { 0: isCreatingOrUpdating, 1: setIsCreatingOrUpdating } =
-    useState(false);
-  const { 0: categories, 1: setCategories } = useState<Array<CategoryFromDB>>(
-    []
+  const [isCreatingOrUpdating, setIsCreatingOrUpdating] = useState(false);
+  const [categories, setCategories] = useState<Array<CategoryFromDB>>([]);
+  const [editingCategory, setEditingCategory] = useState<CategoryFromDB | null>(
+    null
   );
-  const { 0: editingCategory, 1: setEditingCategory } =
-    useState<CategoryFromDB | null>(null);
-  const { 0: isFetchingAllCategories, 1: setIsFetchingAllCategories } =
-    useState(false);
-  const { 0: propertiesArray, 1: setPropertiesArray } = useState<
+  const [isFetchingAllCategories, setIsFetchingAllCategories] = useState(false);
+  const [propertiesArray, setPropertiesArray] = useState<
     Array<{ propertyName: string; propertyValuesAsOneString: string }>
   >([]);
 

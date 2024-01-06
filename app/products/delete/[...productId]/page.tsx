@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 function DeleteProduct({ params }: { params: { productId: string } }) {
-  const { 0: productName, 1: setProductName } = useState("");
-  const { 0: isDeleting, 1: setIsDeleting } = useState(false);
+  const [productName, setProductName] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const id = params.productId[0];
 

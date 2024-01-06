@@ -40,8 +40,8 @@ type OrderType = {
 const ORDERS_PER_PAGE = 10;
 
 function OrdersPage() {
-  const { 0: orders, 1: setOrders } = useState<Array<OrderType>>([]);
-  const { 0: isLoading, 1: setIsLoading } = useState(false);
+  const [orders, setOrders] = useState<Array<OrderType>>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const sortingBy = useGetSortParams();
