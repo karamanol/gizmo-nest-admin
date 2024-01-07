@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 //?--------------POST-----------------
 export async function POST(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
     const { name, price, description, discount, category, specs } =
       await request.json();
 
@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
 //?------------------PATCH------------------------
 export async function PATCH(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
     const {
       name,
       price,
@@ -107,8 +107,8 @@ export async function PATCH(request: NextRequest) {
 //?------------------------DELETE------------------------
 export async function DELETE(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return Response.json({ status: 404, error: "Id not found" });

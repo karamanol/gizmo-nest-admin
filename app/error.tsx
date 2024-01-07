@@ -15,7 +15,11 @@ export default function Error({
 
   return (
     <div className="flex flex-col justify-center items-center">
-      <h2 className="mt-8">🤔 Something went wrong!</h2>
+      <h2 className="mt-8 text-xl mb-3 text-center font-semibold">
+        🤔 Something went wrong!
+      </h2>
+      <p className="text-center">{error.message}</p>
+      {/* <p className="text-center">{error.stack}</p> */}
       <button
         className="border border-teal-700/40 px-3 py-1 rounded-md hover:bg-[#B2BECC] transition-colors mt-4"
         onClick={

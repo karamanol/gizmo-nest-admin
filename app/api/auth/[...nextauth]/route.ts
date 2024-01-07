@@ -1,5 +1,8 @@
 import clientPromise from "@/lib/mongodb";
+import { mongooseConnect } from "@/lib/mongoose";
+import AdminUser from "@/models/AdminUser";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import { Types } from "mongoose";
 import NextAuth, {
   AuthOptions,
   NextAuthOptions,
@@ -7,8 +10,6 @@ import NextAuth, {
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-
-const adminEmails = ["karamanoleksii@gmail.com"];
 
 const authOptions: AuthOptions = {
   // Configure one or more authentication providers
@@ -24,24 +25,34 @@ const authOptions: AuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   adapter: MongoDBAdapter(clientPromise),
-  callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      const isAllowedToSignIn = adminEmails.includes(user.email as string);
 
-      if (isAllowedToSignIn) {
-        return true;
-      } else {
-        // Return false to display a default error message
-        return false;
-      }
-    },
-  },
+  // disabled to let any user to visit site, at least in readonly mode
+  // callbacks: {
+  //   async signIn({ user, account, profile, email, credentials }) {
+  //     const isAllowedToSignIn = adminEmails.includes(user.email as string);
+
+  //     if (isAllowedToSignIn) {
+  //       return true;
+  //     } else {
+  // Return false to display a default error message
+  //       return false;
+  //     }
+  //   },
+  // },
 };
 
 const handler = NextAuth(authOptions);
 
+export type AdminUserType = {
+  _id: Types.ObjectId;
+  email: string;
+};
 export const isAdmin = async (authOpt: AuthOptions) => {
+  await mongooseConnect();
   const session = await getServerSession(authOpt);
+  const admins: AdminUserType[] = await AdminUser.find();
+  const adminEmails = admins.map((admin) => admin.email);
+
   if (!adminEmails.includes(session?.user?.email as string)) {
     throw new Error("You must be an admin to do that action");
   }

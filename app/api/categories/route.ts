@@ -23,8 +23,8 @@ const prepare = (
 //?--------------POST-----------------
 export async function POST(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
     const data = await request.json();
     const {
       propertiesArray,
@@ -62,9 +62,9 @@ export async function GET(request: NextRequest) {
 
 //?--------------PATCH----------------
 export async function PATCH(request: NextRequest) {
-  await isAdmin(authOptions);
-  await mongooseConnect();
   try {
+    await mongooseConnect();
+    await isAdmin(authOptions);
     const { category, parentCat, _id, propertiesArray } = await request.json();
 
     const preparedPropertiesArray = prepare(propertiesArray);
@@ -87,9 +87,9 @@ export async function PATCH(request: NextRequest) {
 
 //?---------------------DELETE--------------------
 export async function DELETE(request: NextRequest) {
-  await isAdmin(authOptions);
-  await mongooseConnect();
   try {
+    await mongooseConnect();
+    await isAdmin(authOptions);
     const { searchParams } = new URL(request.url);
     const _id = searchParams.get("_id");
     if (!_id) return Response.json({ status: 404, error: "Id not found" });

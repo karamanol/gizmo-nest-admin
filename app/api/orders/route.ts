@@ -4,7 +4,7 @@ import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 const sortingOptions = {
   new_first: {
@@ -36,8 +36,8 @@ const sortingOptions = {
 
 export async function GET(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    // await isAdmin(authOptions);
 
     const { searchParams } = new URL(request.url);
     const sort = searchParams.get("sort") || "";
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  await isAdmin(authOptions);
   await mongooseConnect();
+  await isAdmin(authOptions);
   try {
     const { searchParams } = new URL(request.url);
     const _id = searchParams.get("_id");
@@ -84,8 +84,8 @@ export async function DELETE(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
 
     const body = await request.json();
     if (!body._id) throw new Error("Id not found");

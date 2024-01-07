@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 // endpoint for deleting image from mongo and supabase
 export async function DELETE(request: NextRequest) {
   try {
-    await isAdmin(authOptions);
     await mongooseConnect();
+    await isAdmin(authOptions);
     const url = new URL(request.url);
     const img = url.searchParams.get("img");
     const prodId = url.searchParams.get("prodId");

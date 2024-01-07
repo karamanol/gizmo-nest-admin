@@ -3,7 +3,7 @@
 import SpinnerCircle from "@/components/SpinnerCircle";
 import { cn } from "@/lib/cn";
 import { getErrorMessage } from "@/utils/getErrorMessage";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaCheckCircle } from "react-icons/fa";
@@ -47,8 +47,6 @@ function OrdersPage() {
   const sortingBy = useGetSortParams();
   const pageNum = useGetPageParams();
 
-  // console.log(orders);
-
   // fetching orders data for table
   const getOrders = useCallback(
     async (sortBy: string) => {
@@ -88,7 +86,8 @@ function OrdersPage() {
         method: "DELETE",
       });
       const parsedResponse = await deleteResponse.json();
-      if (deleteResponse.ok && !("error" in parsedResponse)) {
+
+      if (deleteResponse.ok && !parsedResponse?.error) {
         return "success";
       } else {
         return "fail";
@@ -97,6 +96,7 @@ function OrdersPage() {
       console.error(getErrorMessage(err));
     }
   };
+
   // onClick handler that deletes or updates the order
   const handleDeleteOrUpdateWithModal = useCallback(
     (modalMessage: string, cb: () => Promise<"success" | "fail" | undefined>) =>
@@ -114,8 +114,10 @@ function OrdersPage() {
             if (success === "success") {
               toast.success("Done!");
               getOrders(sortingBy);
-            } else if (success === "fail") {
-              toast.error("Something went wrong");
+            } else {
+              toast.error(
+                "Something went wrong. Make sure you are signed in as administrator."
+              );
             }
           })();
         }
@@ -173,15 +175,18 @@ function OrdersPage() {
           if ("success" in body && body.success === "success") {
             toast.success("All unpaid orders deleted successfully");
             getOrders(sortingBy);
-          } else if ("success" in body && body.success === "fail")
-            toast.error("Something went wrong");
+          } else if ("success" in body && body.success === "fail") {
+            toast.error(
+              "Something went wrong. Make sure you are signed in as administrator"
+            );
+          }
         })();
       }
     });
   };
 
   return (
-    <div className="">
+    <div>
       {isLoading ? (
         <div className="flex justify-center items-center h-screen">
           <SpinnerCircle />

@@ -170,7 +170,10 @@ function CategoriesPage() {
           if (success === "success") {
             toast.success("Category deleted successfully");
             getCategories();
-          } else if (success === "fail") toast.error("Something went wrong");
+          } else if (success === "fail")
+            toast.error(
+              "Something went wrong. Make sure you have admin rights"
+            );
         })();
       }
     });

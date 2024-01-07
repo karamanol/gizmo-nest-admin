@@ -76,3 +76,7 @@ table.default a {
 .infoCell {
   @apply inline-block border rounded-md border-gray-400 px-2 py-1 bg-gray-300/70;
 }
+
+.admin-list-item:not(:last-child) {
+  border-bottom: 1px solid #c4c4c4;
+}
