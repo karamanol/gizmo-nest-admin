@@ -44,7 +44,6 @@ export default function Products() {
     [setPoducts, page, setIsLoading]
   );
 
-  console.log("products", products);
   return (
     <div>
       <Link

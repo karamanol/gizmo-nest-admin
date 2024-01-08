@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
       // otherwise, i had to make another separate request to get the count of orders in db
     ]);
 
-    // console.log(orders);
     return NextResponse.json(orders);
   } catch (err) {
     return Response.json({ error: getErrorMessage(err), status: 500 });

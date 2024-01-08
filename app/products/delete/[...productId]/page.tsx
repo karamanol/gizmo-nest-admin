@@ -38,11 +38,15 @@ function DeleteProduct({ params }: { params: { productId: string } }) {
       const deleteResponse = await fetch("/api/products?id=" + id, {
         method: "DELETE",
       });
-      if (deleteResponse.ok) {
+
+      const parsedResponse = await deleteResponse.json();
+      console.log(parsedResponse);
+      if (deleteResponse.ok && !("error" in parsedResponse)) {
         toast.success("Deleted successfully");
         router.push("/products");
       } else {
-        toast.error("Something went wrong");
+        toast.error("Something went wrong. " + parsedResponse?.error || "");
+        router.push("/products");
       }
     } catch (err) {
       if (err instanceof Error) {

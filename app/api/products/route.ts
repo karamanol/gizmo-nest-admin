@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
       specs,
       ...(category ? { category } : { $unset: { category: "" } }), // when no category is specified - no category to be set on product
     });
-    console.log(newProduct);
     return Response.json({ status: 200, data: newProduct });
   } catch (err) {
     if (err instanceof Error || err instanceof MongooseError) {
@@ -48,7 +47,6 @@ export async function GET(request: NextRequest) {
     const limit = 20;
     const skip = (page - 1) * limit;
 
-    // console.log(page);
     const products = await Product.find()
       .sort({ createdAt: "desc" })
       .skip(skip)

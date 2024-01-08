@@ -3,6 +3,7 @@
 import SpinnerCircle from "@/components/SpinnerCircle";
 import { cn } from "@/lib/cn";
 import { getErrorMessage } from "@/utils/getErrorMessage";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useCallback, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -34,6 +35,8 @@ function CategoriesPage() {
     setValue,
     formState: { errors },
   } = useForm<CategoryFormValues>();
+
+  const [parent] = useAutoAnimate();
 
   const getCategories = useCallback(async () => {
     setIsFetchingAllCategories(true);
@@ -180,18 +183,14 @@ function CategoriesPage() {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl">
       <h1 className="text-teal-700 font-semibold mb-2 text-xl">Categories</h1>
       <label className="inline-block mb-1">
         {editingCategory
           ? `Editing the "${editingCategory.name}" category:`
-          : "Quickly create new category:"}
+          : " Quickly create new category:"}
       </label>
-      <form
-        onSubmit={handleSubmit(createCategory)}
-        className={cn("mb-5 p-1 border border-white/0", {
-          "border border-teal-600/50 rounded-md p-1": !!editingCategory,
-        })}>
+      <form onSubmit={handleSubmit(createCategory)} className={"mb-5 p-1"}>
         <div className="flex gap-3 max-w-3xl">
           <input
             {...register("category", { required: "Name the category" })}
@@ -240,42 +239,45 @@ function CategoriesPage() {
               Remove
             </button>
           )}
-          {propertiesArray.map((_property, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                placeholder="Property name"
-                value={propertiesArray[i].propertyName}
-                onChange={(e) => {
-                  setPropertiesArray((prev) => {
-                    const copyArr = [...prev];
-                    const currentObject = copyArr[i];
-                    const updatedObject = {
-                      ...currentObject,
-                      propertyName: e.target.value,
-                    };
-                    copyArr[i] = updatedObject;
-                    return [...copyArr];
-                  });
-                }}
-              />
-              <input
-                placeholder="Values (Comma separated!)"
-                value={propertiesArray[i].propertyValuesAsOneString}
-                onChange={(e) => {
-                  setPropertiesArray((prev) => {
-                    const copyArr = [...prev];
-                    const currentObject = copyArr[i];
-                    const updatedObject = {
-                      ...currentObject,
-                      propertyValuesAsOneString: e.target.value,
-                    };
-                    copyArr[i] = updatedObject;
-                    return [...copyArr];
-                  });
-                }}
-              />
-            </div>
-          ))}
+          <div ref={parent}>
+            {propertiesArray.map((_property, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  className="max-w-sm"
+                  placeholder="Property name"
+                  value={propertiesArray[i].propertyName}
+                  onChange={(e) => {
+                    setPropertiesArray((prev) => {
+                      const copyArr = [...prev];
+                      const currentObject = copyArr[i];
+                      const updatedObject = {
+                        ...currentObject,
+                        propertyName: e.target.value,
+                      };
+                      copyArr[i] = updatedObject;
+                      return [...copyArr];
+                    });
+                  }}
+                />
+                <input
+                  placeholder="Values (Comma separated!)"
+                  value={propertiesArray[i].propertyValuesAsOneString}
+                  onChange={(e) => {
+                    setPropertiesArray((prev) => {
+                      const copyArr = [...prev];
+                      const currentObject = copyArr[i];
+                      const updatedObject = {
+                        ...currentObject,
+                        propertyValuesAsOneString: e.target.value,
+                      };
+                      copyArr[i] = updatedObject;
+                      return [...copyArr];
+                    });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
         <div

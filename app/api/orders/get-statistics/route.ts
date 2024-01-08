@@ -1,5 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Order } from "@/models/Order";
+import { Product } from "@/models/Product";
+import { Review } from "@/models/Review";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,6 +19,9 @@ export async function GET(request: NextRequest) {
       paidOrders,
       deliveredOrders,
       popularProducts,
+      productsInStockQuantity,
+      reviewsQuantity,
+      productsByAvgRating,
     ] = await Promise.all([
       Order.countDocuments({}),
       Order.countDocuments({ createdAt: { $gte: startOfToday } }),
@@ -31,8 +36,13 @@ export async function GET(request: NextRequest) {
           },
         },
         { $sort: { totalQuantity: -1 } },
-        { $limit: 3 },
+        { $limit: 5 },
       ]),
+      Product.countDocuments({ soldout: false }),
+      Review.countDocuments(),
+      Product.find({ ratingsQuantity: { $gte: 2 } })
+        .sort({ ratingsAverage: -1 })
+        .limit(5),
     ]);
 
     return NextResponse.json({
@@ -40,7 +50,10 @@ export async function GET(request: NextRequest) {
       ordersToday,
       paidOrders,
       deliveredOrders,
-      topThreeProducts: popularProducts,
+      topFiveProducts: popularProducts,
+      productsInStockQuantity,
+      reviewsQuantity,
+      productsByAvgRating,
     });
   } catch (err) {
     return Response.json({ error: getErrorMessage(err), status: 500 });

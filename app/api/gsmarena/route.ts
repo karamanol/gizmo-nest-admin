@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
           const descriptions = devices.map((device) => {
             return { name: device?.name, description: device?.description };
           });
-          console.log("descr", descriptions);
           if (descriptions) {
             return Response.json({
               status: 200,

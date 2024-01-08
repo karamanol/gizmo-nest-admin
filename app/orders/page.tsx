@@ -186,7 +186,7 @@ function OrdersPage() {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl">
       {isLoading ? (
         <div className="flex justify-center items-center h-screen">
           <SpinnerCircle />
@@ -199,7 +199,6 @@ function OrdersPage() {
               className="!w-fit m-0"
               value={sortingBy}
               onChange={(e) => {
-                // router.push(`?page=${pageNum}&sort=${e.target.value}`);
                 router.push(
                   `?${new URLSearchParams({
                     page: pageNum.toString(),

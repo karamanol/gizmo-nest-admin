@@ -36,7 +36,7 @@ async function ReviewsPage() {
   }
 
   return (
-    <div>
+    <div className="max-w-5xl">
       <p className="text-2xl font-semibold text-gray-900 my-3">
         Latest reviews:
       </p>

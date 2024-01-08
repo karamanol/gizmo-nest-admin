@@ -1,22 +1,15 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import AdminUser from "@/models/AdminUser";
 import AddAdminForm from "@/components/AddAdminForm";
-import {
-  AdminUserType,
-  authOptions,
-  isAdmin,
-} from "../api/auth/[...nextauth]/route";
-import { Types } from "mongoose";
+import { AdminUserType } from "../api/auth/[...nextauth]/route";
 import RemoveAdminButton from "@/components/RemoveAdminButton";
-import { revalidatePath } from "next/cache";
-import { removeAdmin } from "@/actions/removeAdmin";
 
 async function SettingsPage() {
   await mongooseConnect();
   const admins: AdminUserType[] = await AdminUser.find();
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-5xl">
       <h2 className="text-xl text-gray-900 font-semibold mb-4">
         Give to user an admin rights:
       </h2>
