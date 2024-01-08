@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^2.0.3",
+    "@formkit/auto-animate": "^0.8.1",
     "@supabase/supabase-js": "^2.38.4",
     "clsx": "^2.0.0",
     "gsmarena-api": "^2.0.4",

@@ -21,7 +21,7 @@ export default function Error({
       <p className="text-center">{error.message}</p>
       {/* <p className="text-center">{error.stack}</p> */}
       <button
-        className="border border-teal-700/40 px-3 py-1 rounded-md hover:bg-[#B2BECC] transition-colors mt-4"
+        className="border border-teal-700/40 px-3 py-1 rounded-md hover:bg-[#b2becc95] transition-colors mt-4"
         onClick={
           // Attempt to recover by trying to re-render the segment
           () => reset()

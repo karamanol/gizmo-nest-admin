@@ -8,6 +8,7 @@ import { TbTruckDelivery } from "react-icons/tb";
 import { CiStar } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 type OrderStats = {
   totalOrders: number;
@@ -23,6 +24,8 @@ type OrderStats = {
 export default function Home() {
   const { data: session } = useSession();
   const [data, setData] = useState<OrderStats>();
+
+  const [parent] = useAutoAnimate();
 
   useEffect(() => {
     async function getStatistics() {
@@ -41,7 +44,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="mb-10 mt-4">
+      <div className="mb-6 ">
         <h2>
           Hello, <span className="font-semibold">{session?.user?.name}</span>
         </h2>
@@ -74,15 +77,17 @@ export default function Home() {
               {!data?.topThreeProducts.length ? "⌛" : null}
             </span>
           </p>
-          <div className="text-gray-700 flex flex-col gap-1 ml-6 mt-1">
+          <ol
+            ref={parent}
+            className="text-gray-700 flex flex-col gap-1 ml-6 mt-1 list-decimal">
             {data?.topThreeProducts.map((product) => (
-              <span
+              <li
                 key={product._id}
-                className="border w-fit px-3 py-1 rounded-md bg-gray-50">
+                className=" border w-fit px-3 py-1 rounded-md bg-gray-50">
                 {product._id}: {product.totalQuantity} items
-              </span>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </>
