@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# GizmoNest Admin center
 
-## Getting Started
+## Description
 
-First, run the development server:
+GizmoNest Admin is Next.js command center for managing the GizmoNest Shop. It facilitates the administration of products, categories, reviews, orders, and user roles.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **User Authentication**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   - Implemented NextAuth for secure and seamless user authentication.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. **Product Management**
 
-## Learn More
+   - Easily manage and update product information.
+   - Efficiently handle product images.
 
-To learn more about Next.js, take a look at the following resources:
+3. **Categories Management**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   - Streamlined categories management for better organization.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+4. **Orders and Payments**
 
-## Deploy on Vercel
+   - Track and manage product orders effectively.
+   - Efficiently check and handle payment transactions.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Statistics**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+   - Comprehensive statistics on products and orders for informed decision-making.
+
+6. **Reviews Management**
+
+   - Easily manage customer reviews.
+
+7. **External Data Parsing**
+
+   - Integration with GSMArena.com for product information retrieval.
+
+8. **Responsive Design**
+   - User-friendly and responsive design.
+
+## Installation
+
+1. Clone the repository
+
+2. Install the dependencies:
+
+   ```
+   npm install
+   ```
+
+3. Start the development server:
+
+   ```
+   npm run dev
+
+   ```
+
+## .env.local file must be created and contain following variables for running:
+
+### For authentication:
+
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GITHUB_CLIENT_ID
+- GITHUB_SECRET_ID
+- NEXTAUTH_SECRET
+- NEXTAUTH_URL
+
+### Mongodb integration
+
+- MONGODB_URI
+
+### Uploading images to Supabase
+
+- SUPABASE_PASS
+- NEXT_PUBLIC_SUPABASE_PROJECT_URL
+- NEXT_PUBLIC_SUPABASE_API_KEY

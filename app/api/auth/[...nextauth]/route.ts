@@ -12,7 +12,7 @@ import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 
 const authOptions: AuthOptions = {
-  // Configure one or more authentication providers
+  // Configuring authentication providers
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? "",
@@ -26,7 +26,8 @@ const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   adapter: MongoDBAdapter(clientPromise),
 
-  // disabled to let any user to visit site, at least in readonly mode
+  // disabled to let any user to visit site, at least in readonly mode:
+
   // callbacks: {
   //   async signIn({ user, account, profile, email, credentials }) {
   //     const isAllowedToSignIn = adminEmails.includes(user.email as string);
