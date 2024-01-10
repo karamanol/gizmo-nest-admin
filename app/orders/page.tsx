@@ -192,7 +192,7 @@ function OrdersPage() {
           <SpinnerCircle />
         </div>
       ) : (
-        <div className="overflow-x-hidden">
+        <div>
           <div className="flex m-2 gap-2 h-12 items-center ">
             <span className="sm:text-xl whitespace-nowrap">Sort by:</span>
             <select
