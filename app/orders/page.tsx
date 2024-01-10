@@ -192,9 +192,9 @@ function OrdersPage() {
           <SpinnerCircle />
         </div>
       ) : (
-        <>
-          <div className="flex m-2 gap-2 h-12 items-center">
-            <span className="text-xl">Sort by:</span>
+        <div className="overflow-x-hidden">
+          <div className="flex m-2 gap-2 h-12 items-center ">
+            <span className="sm:text-xl whitespace-nowrap">Sort by:</span>
             <select
               className="!w-fit m-0"
               value={sortingBy}
@@ -219,7 +219,9 @@ function OrdersPage() {
               className="btn-primary ml-auto"
               type="button"
               onClick={handleDeleteAllUnpaid}>
-              Delete all unpaid orders
+              <span className="text-sm sm:text-base">
+                Delete all unpaid orders
+              </span>
             </button>
           </div>
           <table className="default table-auto ">
@@ -356,7 +358,7 @@ function OrdersPage() {
               isDisabledNextBtn={orders.length <= ORDERS_PER_PAGE}
             />
           )}
-        </>
+        </div>
       )}
     </div>
   );
