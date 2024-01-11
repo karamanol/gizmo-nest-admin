@@ -387,7 +387,7 @@ function ProductForm({
               defaultChecked={defaultValuesObj?.promoted}
               className="w-fit m-0"
             />
-            <label htmlFor="soldout" className="text-lg">
+            <label htmlFor="promoted" className="text-lg">
               Mark as promoted on home page?
             </label>
           </section>
