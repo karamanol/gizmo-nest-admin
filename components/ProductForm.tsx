@@ -253,14 +253,18 @@ function ProductForm({
     const html = devicesHtmlArr?.join("<br><br>");
     Swal.fire({
       title: "Result:",
-      html: html || "No data found :(",
+      html:
+        html ||
+        "No data found :(. Try to remove memory, color or other details from product name. Also keep in mind that GSMArena has at most cell phones data",
       animation: false,
       confirmButtonColor: "#0d9488",
     });
   };
 
   return action === "Update" && !defaultValuesObj ? (
-    <SpinnerCircle />
+    <div className="h-[80%] w-full flex justify-center items-center">
+      <SpinnerCircle />
+    </div>
   ) : (
     <form onSubmit={handleSubmit(createOrUpdateProduct)}>
       <label htmlFor="name" className="text-lg">

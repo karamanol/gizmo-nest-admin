@@ -11,7 +11,7 @@ export async function mongooseConnect() {
     const uri = process.env.MONGODB_URI;
     if (!uri) throw new Error("MONGODB_URI is not defined");
     try {
-      await mongoose.connect(uri);
+      await mongoose.connect(uri, { autoIndex: true });
       console.log("Connected via Mongoose");
       return mongoose.connection; // Return the connection when it's established
     } catch (err) {
