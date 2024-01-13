@@ -27,7 +27,7 @@ async function SettingsPage() {
             <span>{admin.email}</span>
             <RemoveAdminButton
               adminId={admin._id.toString()}
-              adminsAmount={admins?.length || 1}
+              adminsQuantity={admins?.length || 1}
             />
           </li>
         ))}

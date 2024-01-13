@@ -6,11 +6,11 @@ import AdminUser from "@/models/AdminUser";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { revalidatePath } from "next/cache";
 
-export const removeAdmin = async (id: string, adminsAmount: number) => {
+export const removeAdmin = async (id: string, adminsQuantity: number) => {
   try {
     await mongooseConnect();
     await isAdmin(authOptions);
-    if (adminsAmount === 1)
+    if (adminsQuantity === 1)
       throw new Error("At least one admin needs to remain");
     await AdminUser.findByIdAndDelete(id);
     revalidatePath("/settings");
