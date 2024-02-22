@@ -1,8 +1,8 @@
 import AuthButton from "../components/AuthButton";
 import { getServerSession } from "next-auth";
 import Navigation from "@/components/Navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Toaster } from "react-hot-toast";
+import { authOptions } from "@/lib/authOptions";
 
 type LayoutProps = { children: React.ReactNode };
 

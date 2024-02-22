@@ -2,7 +2,8 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Category } from "@/models/Category";
 import { MongooseError } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions, isAdmin } from "../auth/[...nextauth]/route";
+import { isAdmin } from "@/lib/isAdmin";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = "force-dynamic";
 

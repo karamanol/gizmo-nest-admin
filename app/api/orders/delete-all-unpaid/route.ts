@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
-import { authOptions, isAdmin } from "../../auth/[...nextauth]/route";
 import { mongooseConnect } from "@/lib/mongoose";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { Order } from "@/models/Order";
+import { isAdmin } from "@/lib/isAdmin";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = "force-dynamic";
 

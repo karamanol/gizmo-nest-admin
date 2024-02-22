@@ -1,8 +1,8 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import AdminUser from "@/models/AdminUser";
 import AddAdminForm from "@/components/AddAdminForm";
-import { AdminUserType } from "../api/auth/[...nextauth]/route";
 import RemoveAdminButton from "@/components/RemoveAdminButton";
+import { AdminUserType } from "@/lib/isAdmin";
 
 async function SettingsPage() {
   await mongooseConnect();

@@ -1,6 +1,7 @@
 "use server";
 
-import { authOptions, isAdmin } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
+import { isAdmin } from "@/lib/isAdmin";
 import { mongooseConnect } from "@/lib/mongoose";
 import AdminUser from "@/models/AdminUser";
 import { isValidEmail } from "@/utils/isValidEmail";

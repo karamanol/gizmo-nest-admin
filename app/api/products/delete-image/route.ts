@@ -3,7 +3,8 @@ import supabase from "@/lib/supabase";
 import { Product } from "@/models/Product";
 import { MongooseError } from "mongoose";
 import { NextRequest } from "next/server";
-import { authOptions, isAdmin } from "../../auth/[...nextauth]/route";
+import { isAdmin } from "@/lib/isAdmin";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = "force-dynamic";
 
